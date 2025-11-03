@@ -36,6 +36,20 @@ async function connectionLogic() {
   sock.ev.on("messages.upsert", (messageInfoUpsert) => {
     if (messageInfoUpsert.type === "notify") {
       const messages = messageInfoUpsert.messages;
+
+      // Make message history in DB
+      const messagesCollection = db.collection("messages");
+      messages.forEach(async (msg) => {
+        await messagesCollection.insertOne({
+          id: msg.key.id,
+          from: msg.key.remoteJid,
+          message: msg.message,
+          timestamp: msg.messageTimestamp,
+          fromMe: msg.key.fromMe,
+        });
+      });
+
+      // Webhooks
       messages.forEach(async (msg) => {
         if (!msg.key.fromMe && msg.message) {
           // Send to webhook
@@ -56,6 +70,7 @@ async function connectionLogic() {
           }
         }
       });
+
     }
   });
 

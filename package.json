@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NotoriousArnav/Whatsapp_Unofficial_REST_API.git"
+    "url": "git+https://github.com/NotoriousArnav/wildcat.git"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/NotoriousArnav/Whatsapp_Unofficial_REST_API/issues"
+    "url": "https://github.com/NotoriousArnav/wildcat/issues"
   },
-  "homepage": "https://github.com/NotoriousArnav/Whatsapp_Unofficial_REST_API#readme",
+  "homepage": "https://github.com/NotoriousArnav/wildcat#readme",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@hapi/boom": "^10.0.1",
