@@ -5,12 +5,16 @@ const useMongoDBAuthState = require("./mongoAuthState");
 const qrcode = require("qrcode-terminal");
 
 const { connectToDB } = require("./db");
+const { startServer, makeApp, constructApp } = require("./server");
+const { routes } = require("./routes");
 
 async function connectionLogic() {
   const db = await connectToDB();
   const collection = db.collection("auth_info_baileys");
   const { state, saveCreds } = await useMongoDBAuthState(collection);
   const sock = makeWASocket({auth: state});
+  const app = constructApp(sock);
+  makeApp(app, routes);
 
   // Handle Login and Reconnection
   sock.ev.on("connection.update", async (update) => {
@@ -22,8 +26,7 @@ async function connectionLogic() {
     }
   });
 
-  // Save credentials whenever updated
-  sock.ev.on("creds.update", saveCreds);
+  sock.ev.on("creds.update", saveCreds); // Save credentials whenever updated
 
   // Listen for message updates
   sock.ev.on("messages.update", (messageInfo) => {});
@@ -33,7 +36,8 @@ async function connectionLogic() {
     const messages = messageInfoUpsert.messages;
     console.log(messages[0].message);
   });
+
+  startServer(app);
 }
 
-// Start the connection logic
-connectionLogic();
+connectionLogic(); // Start the connection logic

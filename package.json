@@ -1,8 +1,8 @@
 {
-  "name": "whatsapp_unofficial_rest_api",
+  "name": "wildcat",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "description": "Whatsapp Integration Layer for Data Connectivity and Transfer",
+  "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js"
   },

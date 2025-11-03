@@ -1,14 +1,18 @@
 require('dotenv').config();
 const express = require('express');
 
-const app = express();
-app.use(express.json());
+const constructApp = function (whatsapp_socket){
+  const app = express();
+  app.locals.whatsapp_socket = whatsapp_socket;
+  app.use(express.json());
+  return app;
+}
 
 const makeApp = (app, routes) => {
   routes.forEach((route) => {
     const { path, method, handler } = route;
     app[method](path, handler);
-  }
+  });
 }
 
 const startServer = async (app) => {
@@ -21,6 +25,6 @@ const startServer = async (app) => {
 
 module.exports = {
   makeApp,
-
-  app
+  startServer,
+  constructApp
 }
