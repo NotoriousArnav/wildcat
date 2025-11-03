@@ -1,10 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 
+const { httpLogger } = require('./logger');
+
 const constructApp = function (whatsapp_socket){
   const app = express();
   app.locals.whatsapp_socket = whatsapp_socket;
   app.use(express.json());
+  app.use(httpLogger());
   return app;
 }
 

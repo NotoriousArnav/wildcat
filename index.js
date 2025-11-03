@@ -13,8 +13,9 @@ async function connectionLogic() {
   const db = await connectToDB();
   const collection = db.collection("auth_info_baileys");
   const { state, saveCreds } = await useMongoDBAuthState(collection);
-  const sock = makeWASocket({auth: state});
+  const sock = makeWASocket({auth: state}); require("./logger").wireSocketLogging(sock);
   const app = constructApp(sock);
+
   makeApp(app, routes);
 
   // Handle Login and Reconnection
@@ -29,8 +30,7 @@ async function connectionLogic() {
 
   sock.ev.on("creds.update", saveCreds); // Save credentials whenever updated
 
-  // Listen for message updates
-  sock.ev.on("messages.update", (messageInfo) => {});
+  sock.ev.on("messages.update", (messageInfo) => {}); // Listen for message updates
 
   // Listen for incoming messages
   sock.ev.on("messages.upsert", (messageInfoUpsert) => {
