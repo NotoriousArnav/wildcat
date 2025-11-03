@@ -7,6 +7,7 @@ const qrcode = require("qrcode-terminal");
 const { connectToDB } = require("./db");
 const { startServer, makeApp, constructApp } = require("./server");
 const { routes } = require("./routes");
+const { sendToWebhook } = require("./webhookHandler");
 
 async function connectionLogic() {
   const db = await connectToDB();
@@ -33,8 +34,29 @@ async function connectionLogic() {
 
   // Listen for incoming messages
   sock.ev.on("messages.upsert", (messageInfoUpsert) => {
-    const messages = messageInfoUpsert.messages;
-    console.log(messages[0].message);
+    if (messageInfoUpsert.type === "notify") {
+      const messages = messageInfoUpsert.messages;
+      messages.forEach(async (msg) => {
+        if (!msg.key.fromMe && msg.message) {
+          // Send to webhook
+          const payload = {
+            id: msg.key.id,
+            from: msg.key.remoteJid,
+            message: msg.message,
+            timestamp: msg.messageTimestamp,
+          };
+          // Fetch webhooks from DB
+          const webhooksCollection = db.collection("webhooks");
+          const webhooks = await webhooksCollection.find({}).toArray();
+          for (const webhook of webhooks) {
+            const result = await sendToWebhook(webhook.url, payload);
+            if (!result.ok) {
+              console.error(`Failed to send message to webhook ${webhook.url}:`, result.error);
+            }
+          }
+        }
+      });
+    }
   });
 
   startServer(app);
