@@ -1,0 +1,39 @@
+{
+  "name": "whatsapp_unofficial_rest_api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NotoriousArnav/Whatsapp_Unofficial_REST_API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NotoriousArnav/Whatsapp_Unofficial_REST_API/issues"
+  },
+  "homepage": "https://github.com/NotoriousArnav/Whatsapp_Unofficial_REST_API#readme",
+  "dependencies": {
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc.6",
+    "axios": "^1.13.1",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "link-preview-js": "^3.1.0",
+    "mongo-baileys": "^1.0.1",
+    "mongodb": "^6.20.0",
+    "qrcode-terminal": "^0.12.0",
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.20.6"
+  }
+}
