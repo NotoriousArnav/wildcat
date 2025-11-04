@@ -146,6 +146,9 @@ class SocketManager {
               // Additional metadata
               isForwarded: msg.message?.extendedTextMessage?.contextInfo?.isForwarded || false,
               
+              // Store raw Baileys message for reply functionality
+              rawMessage: msg,
+              
               // Timestamps
               createdAt: new Date(),
               updatedAt: new Date(),

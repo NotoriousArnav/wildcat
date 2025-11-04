@@ -26,12 +26,230 @@ function createAccountRouter(accountId, socketManager) {
   })();
 
   // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  /**
+   * Load a quoted message for reply functionality
+   * Tries socket store first, then DB with rawMessage, then constructs from DB fields
+   */
+  async function loadQuotedMessage(socketInfo, quotedMessageId, chatId) {
+    try {
+      // First try to load from socket's message store
+      let quotedMsg = null;
+      try {
+        quotedMsg = await socketInfo.socket.loadMessage(chatId, quotedMessageId);
+      } catch (socketErr) {
+        // Socket loadMessage can throw errors - ignore and fallback to DB
+        console.log(`[QUOTE] Socket loadMessage failed, will try DB: ${socketErr.message}`);
+      }
+      
+      if (quotedMsg) {
+        console.log(`[QUOTE] Loaded from socket store: ${quotedMessageId}`);
+        return quotedMsg;
+      }
+
+      // Fallback: get raw message from DB
+      console.log(`[QUOTE] Socket store miss, trying DB: ${quotedMessageId}`);
+      
+      if (!db) {
+        console.error(`[QUOTE] DB not initialized yet, connecting now...`);
+        db = await connectToDB();
+      }
+      
+      const messagesCollection = db.collection('messages');
+      const dbMsg = await messagesCollection.findOne({ 
+        messageId: quotedMessageId,
+        accountId: accountId 
+      });
+      
+      if (!dbMsg) {
+        console.warn(`[QUOTE] Message not found in DB: ${quotedMessageId}`);
+        return null;
+      }
+
+      if (dbMsg.rawMessage) {
+        // Sanitize the rawMessage - only include essential fields
+        // and fix empty participant strings
+        const participant = dbMsg.rawMessage.key.participant && dbMsg.rawMessage.key.participant.trim() 
+          ? dbMsg.rawMessage.key.participant 
+          : undefined;
+        
+        const sanitizedQuote = {
+          key: {
+            remoteJid: dbMsg.rawMessage.key.remoteJid,
+            id: dbMsg.rawMessage.key.id,
+            fromMe: dbMsg.rawMessage.key.fromMe,
+            participant: participant
+          },
+          message: dbMsg.rawMessage.message,
+          messageTimestamp: dbMsg.rawMessage.messageTimestamp
+        };
+        
+        console.log(`[QUOTE] Using sanitized rawMessage from DB: ${quotedMessageId}`);
+        return sanitizedQuote;
+      }
+
+      // Last fallback: construct from DB fields
+      console.log(`[QUOTE] No rawMessage, constructing from DB fields: ${quotedMessageId}`);
+      return {
+        key: {
+          remoteJid: dbMsg.chatId,
+          id: dbMsg.messageId,
+          fromMe: dbMsg.fromMe,
+          participant: dbMsg.fromMe ? undefined : dbMsg.from
+        },
+        message: {
+          conversation: dbMsg.text || ''
+        },
+        messageTimestamp: dbMsg.timestamp
+      };
+
+    } catch (err) {
+      console.error(`[QUOTE] Error loading quoted message ${quotedMessageId}:`, err.message);
+      return null;
+    }
+  }
+
+  /**
+   * Store a sent message in the database
+   * Called after successfully sending a message via API
+   */
+  async function storeSentMessage(sentMsg, messageType, additionalData = {}) {
+    try {
+      // Ensure DB is initialized
+      if (!db) {
+        db = await connectToDB();
+      }
+      
+      const messagesCollection = db.collection('messages');
+      
+      // Extract basic message info
+      const messageId = sentMsg.key.id;
+      const chatId = sentMsg.key.remoteJid;
+      const timestamp = sentMsg.messageTimestamp?.low || Math.floor(Date.now() / 1000);
+      
+      // Determine message type and extract content
+      let textContent = null;
+      let hasMedia = false;
+      let mediaUrl = null;
+      let mediaType = null;
+      let caption = null;
+      
+      if (messageType === 'text') {
+        textContent = additionalData.text || null;
+      } else if (['image', 'video', 'audio', 'document'].includes(messageType)) {
+        hasMedia = true;
+        mediaType = messageType;
+        caption = additionalData.caption || null;
+        // Media URL will be set when the message is received back via upsert
+      }
+      
+      // Build message document
+      const messageDoc = {
+        accountId,
+        messageId,
+        chatId,
+        from: chatId, // For sent messages, 'from' is the recipient
+        fromMe: true,
+        timestamp,
+        type: messageType,
+        text: textContent,
+        caption,
+        hasMedia,
+        mediaUrl,
+        mediaType,
+        
+        // Quote context
+        quotedMessage: additionalData.quotedMessage || null,
+        mentions: additionalData.mentions || [],
+        
+        // Store raw message for future operations
+        rawMessage: sentMsg,
+        
+        // Timestamps
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      // Store in MongoDB
+      await messagesCollection.insertOne(messageDoc);
+      console.log(`[STORE] Stored sent ${messageType} message ${messageId}`);
+      
+      return true;
+    } catch (err) {
+      console.error(`[STORE] Failed to store sent message:`, err.message);
+      return false;
+    }
+  }
+
+  // ============================================================================
   // SEND MESSAGE ENDPOINTS
   // ============================================================================
 
-  // Send text message (enhanced with quote/mention support)
-  router.post('/message/send', async (req, res) => {
+  // Reply to a message (dedicated endpoint for cleaner reply handling)
+  router.post('/message/reply', async (req, res) => {
     const { to, message, quotedMessageId, mentions } = req.body || {};
+    
+    if (!to || !message || !quotedMessageId) {
+      return res.status(400).json({
+        ok: false,
+        error: 'to, message, and quotedMessageId are required'
+      });
+    }
+    
+    const socketInfo = socketManager.getSocket(accountId);
+    if (!socketInfo) {
+      return res.status(404).json({ ok: false, error: 'Account not found' });
+    }
+    
+    if (socketInfo.status !== 'connected') {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'Account not connected',
+        status: socketInfo.status 
+      });
+    }
+    
+    try {
+      // Load the quoted message
+      const quotedMsg = await loadQuotedMessage(socketInfo, quotedMessageId, to);
+      
+      if (!quotedMsg) {
+        return res.status(404).json({
+          ok: false,
+          error: 'Quoted message not found'
+        });
+      }
+      
+      // Build message content
+      const messageContent = { text: message };
+      
+      // Add mentions if provided
+      if (mentions && Array.isArray(mentions) && mentions.length > 0) {
+        messageContent.mentions = mentions;
+      }
+      
+      // Send with quoted message
+      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent, { quoted: quotedMsg });
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'text', { text: message, mentions, quotedMessage: quotedMessageId });
+      
+      return res.status(200).json({ 
+        ok: true, 
+        messageId: sentMsg.key.id,
+        timestamp: sentMsg.messageTimestamp
+      });
+    } catch (err) {
+      console.error(`Error sending reply for ${accountId}:`, err);
+      return res.status(500).json({ ok: false, error: err.message || 'internal_error' });
+    }
+  });
+
+  // Send text message (simple, no quote support - use /message/reply for replies)
+  router.post('/message/send', async (req, res) => {
+    const { to, message, mentions } = req.body || {};
     if (!to || !message) {
       return res.status(400).json({
         ok: false,
@@ -56,58 +274,16 @@ function createAccountRouter(accountId, socketManager) {
       // Build message content
       const messageContent = { text: message };
       
-      // Add quoted message if provided
-      if (quotedMessageId) {
-        try {
-          // Try to get the message from WhatsApp socket store
-          const quotedMsgFromStore = await socketInfo.socket.loadMessage(to, quotedMessageId);
-          
-          if (quotedMsgFromStore) {
-            messageContent.quoted = quotedMsgFromStore;
-          } else {
-            // Fallback: construct from DB
-            const messagesCollection = db.collection('messages');
-            const quotedMsg = await messagesCollection.findOne({ 
-              messageId: quotedMessageId,
-              accountId 
-            });
-            
-            if (quotedMsg) {
-              // Construct a proper quoted message object
-              messageContent.quoted = {
-                key: {
-                  remoteJid: quotedMsg.chatId,
-                  id: quotedMsg.messageId,
-                  fromMe: quotedMsg.fromMe,
-                  participant: quotedMsg.fromMe ? undefined : quotedMsg.from
-                },
-                message: {
-                  conversation: quotedMsg.text || ''
-                }
-              };
-            } else {
-              // Last fallback: try with fromMe=true
-              messageContent.quoted = {
-                key: {
-                  remoteJid: to,
-                  id: quotedMessageId,
-                  fromMe: true
-                }
-              };
-            }
-          }
-        } catch (quoteErr) {
-          console.error(`Error loading quoted message ${quotedMessageId}:`, quoteErr.message);
-          // Continue without quote if it fails
-        }
-      }
-      
       // Add mentions if provided
       if (mentions && Array.isArray(mentions) && mentions.length > 0) {
         messageContent.mentions = mentions;
       }
       
       const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'text', { text: message, mentions });
+      
       return res.status(200).json({ 
         ok: true, 
         messageId: sentMsg.key.id,
@@ -147,43 +323,43 @@ function createAccountRouter(accountId, socketManager) {
         mimetype: req.file.mimetype
       };
       
-      // Add quoted message if provided
+      // Build send options (for quoted message)
+      const sendOptions = {};
+      
+      // Add quoted message if provided (as option, not in content)
       if (quotedMessageId) {
         try {
-          // Try to get the message from WhatsApp socket store
-          const quotedMsgFromStore = await socketInfo.socket.loadMessage(to, quotedMessageId);
+          // First try to load from socket's message store
+          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
           
-          if (quotedMsgFromStore) {
-            messageContent.quoted = quotedMsgFromStore;
+          if (quotedMsg) {
+            sendOptions.quoted = quotedMsg;
           } else {
-            // Fallback: construct from DB
+            // Fallback: get raw message from DB
+            console.warn(`Could not load quoted message ${quotedMessageId} from socket store, trying DB...`);
             const messagesCollection = db.collection('messages');
-            const quotedMsg = await messagesCollection.findOne({ 
+            const dbMsg = await messagesCollection.findOne({ 
               messageId: quotedMessageId,
               accountId 
             });
             
-            if (quotedMsg) {
-              // Construct a proper quoted message object
-              messageContent.quoted = {
+            if (dbMsg && dbMsg.rawMessage) {
+              // Use the stored raw Baileys message object
+              sendOptions.quoted = dbMsg.rawMessage;
+            } else if (dbMsg) {
+              // Last fallback: construct from DB fields
+              console.warn(`No rawMessage found for ${quotedMessageId}, constructing from DB fields...`);
+              sendOptions.quoted = {
                 key: {
-                  remoteJid: quotedMsg.chatId,
-                  id: quotedMsg.messageId,
-                  fromMe: quotedMsg.fromMe,
-                  participant: quotedMsg.fromMe ? undefined : quotedMsg.from
+                  remoteJid: dbMsg.chatId,
+                  id: dbMsg.messageId,
+                  fromMe: dbMsg.fromMe,
+                  participant: dbMsg.fromMe ? undefined : dbMsg.from
                 },
                 message: {
-                  conversation: quotedMsg.text || ''
-                }
-              };
-            } else {
-              // Last fallback: try with fromMe=true
-              messageContent.quoted = {
-                key: {
-                  remoteJid: to,
-                  id: quotedMessageId,
-                  fromMe: true
-                }
+                  conversation: dbMsg.text || ''
+                },
+                messageTimestamp: dbMsg.timestamp
               };
             }
           }
@@ -193,7 +369,11 @@ function createAccountRouter(accountId, socketManager) {
         }
       }
       
-      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
+      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent, sendOptions);
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'image', { caption });
+      
       return res.status(200).json({ 
         ok: true, 
         messageId: sentMsg.key.id,
@@ -207,7 +387,7 @@ function createAccountRouter(accountId, socketManager) {
 
   // Send video message
   router.post('/message/send/video', upload.single('video'), async (req, res) => {
-    const { to, caption, gifPlayback } = req.body || {};
+    const { to, caption, gifPlayback, quotedMessageId } = req.body || {};
     
     if (!to) {
       return res.status(400).json({ ok: false, error: 'to field is required' });
@@ -234,7 +414,57 @@ function createAccountRouter(accountId, socketManager) {
         gifPlayback: gifPlayback === 'true' || gifPlayback === true
       };
       
-      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
+      // Build send options (for quoted message)
+      const sendOptions = {};
+      
+      // Add quoted message if provided (as option, not in content)
+      if (quotedMessageId) {
+        try {
+          // First try to load from socket's message store
+          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
+          
+          if (quotedMsg) {
+            sendOptions.quoted = quotedMsg;
+          } else {
+            // Fallback: get raw message from DB
+            console.warn(`Could not load quoted message ${quotedMessageId} from socket store, trying DB...`);
+            const messagesCollection = db.collection('messages');
+            const dbMsg = await messagesCollection.findOne({ 
+              messageId: quotedMessageId,
+              accountId 
+            });
+            
+            if (dbMsg && dbMsg.rawMessage) {
+              // Use the stored raw Baileys message object
+              sendOptions.quoted = dbMsg.rawMessage;
+            } else if (dbMsg) {
+              // Last fallback: construct from DB fields
+              console.warn(`No rawMessage found for ${quotedMessageId}, constructing from DB fields...`);
+              sendOptions.quoted = {
+                key: {
+                  remoteJid: dbMsg.chatId,
+                  id: dbMsg.messageId,
+                  fromMe: dbMsg.fromMe,
+                  participant: dbMsg.fromMe ? undefined : dbMsg.from
+                },
+                message: {
+                  conversation: dbMsg.text || ''
+                },
+                messageTimestamp: dbMsg.timestamp
+              };
+            }
+          }
+        } catch (quoteErr) {
+          console.error(`Error loading quoted message ${quotedMessageId}:`, quoteErr.message);
+          // Continue without quote if it fails
+        }
+      }
+      
+      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent, sendOptions);
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'video', { caption });
+      
       return res.status(200).json({ 
         ok: true, 
         messageId: sentMsg.key.id,
@@ -248,7 +478,7 @@ function createAccountRouter(accountId, socketManager) {
 
   // Send audio message
   router.post('/message/send/audio', upload.single('audio'), async (req, res) => {
-    const { to, ptt } = req.body || {};
+    const { to, ptt, quotedMessageId } = req.body || {};
     
     if (!to) {
       return res.status(400).json({ ok: false, error: 'to field is required' });
@@ -291,7 +521,57 @@ function createAccountRouter(accountId, socketManager) {
         ptt: isPtt // Push-to-talk (voice message)
       };
       
-      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
+      // Build send options (for quoted message)
+      const sendOptions = {};
+      
+      // Add quoted message if provided (as option, not in content)
+      if (quotedMessageId) {
+        try {
+          // First try to load from socket's message store
+          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
+          
+          if (quotedMsg) {
+            sendOptions.quoted = quotedMsg;
+          } else {
+            // Fallback: get raw message from DB
+            console.warn(`Could not load quoted message ${quotedMessageId} from socket store, trying DB...`);
+            const messagesCollection = db.collection('messages');
+            const dbMsg = await messagesCollection.findOne({ 
+              messageId: quotedMessageId,
+              accountId 
+            });
+            
+            if (dbMsg && dbMsg.rawMessage) {
+              // Use the stored raw Baileys message object
+              sendOptions.quoted = dbMsg.rawMessage;
+            } else if (dbMsg) {
+              // Last fallback: construct from DB fields
+              console.warn(`No rawMessage found for ${quotedMessageId}, constructing from DB fields...`);
+              sendOptions.quoted = {
+                key: {
+                  remoteJid: dbMsg.chatId,
+                  id: dbMsg.messageId,
+                  fromMe: dbMsg.fromMe,
+                  participant: dbMsg.fromMe ? undefined : dbMsg.from
+                },
+                message: {
+                  conversation: dbMsg.text || ''
+                },
+                messageTimestamp: dbMsg.timestamp
+              };
+            }
+          }
+        } catch (quoteErr) {
+          console.error(`Error loading quoted message ${quotedMessageId}:`, quoteErr.message);
+          // Continue without quote if it fails
+        }
+      }
+      
+      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent, sendOptions);
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'audio', {});
+      
       return res.status(200).json({ 
         ok: true, 
         messageId: sentMsg.key.id,
@@ -305,7 +585,7 @@ function createAccountRouter(accountId, socketManager) {
 
   // Send document message
   router.post('/message/send/document', upload.single('document'), async (req, res) => {
-    const { to, caption, fileName } = req.body || {};
+    const { to, caption, fileName, quotedMessageId } = req.body || {};
     
     if (!to) {
       return res.status(400).json({ ok: false, error: 'to field is required' });
@@ -332,7 +612,57 @@ function createAccountRouter(accountId, socketManager) {
         fileName: fileName || req.file.originalname
       };
       
-      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
+      // Build send options (for quoted message)
+      const sendOptions = {};
+      
+      // Add quoted message if provided (as option, not in content)
+      if (quotedMessageId) {
+        try {
+          // First try to load from socket's message store
+          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
+          
+          if (quotedMsg) {
+            sendOptions.quoted = quotedMsg;
+          } else {
+            // Fallback: get raw message from DB
+            console.warn(`Could not load quoted message ${quotedMessageId} from socket store, trying DB...`);
+            const messagesCollection = db.collection('messages');
+            const dbMsg = await messagesCollection.findOne({ 
+              messageId: quotedMessageId,
+              accountId 
+            });
+            
+            if (dbMsg && dbMsg.rawMessage) {
+              // Use the stored raw Baileys message object
+              sendOptions.quoted = dbMsg.rawMessage;
+            } else if (dbMsg) {
+              // Last fallback: construct from DB fields
+              console.warn(`No rawMessage found for ${quotedMessageId}, constructing from DB fields...`);
+              sendOptions.quoted = {
+                key: {
+                  remoteJid: dbMsg.chatId,
+                  id: dbMsg.messageId,
+                  fromMe: dbMsg.fromMe,
+                  participant: dbMsg.fromMe ? undefined : dbMsg.from
+                },
+                message: {
+                  conversation: dbMsg.text || ''
+                },
+                messageTimestamp: dbMsg.timestamp
+              };
+            }
+          }
+        } catch (quoteErr) {
+          console.error(`Error loading quoted message ${quotedMessageId}:`, quoteErr.message);
+          // Continue without quote if it fails
+        }
+      }
+      
+      const sentMsg = await socketInfo.socket.sendMessage(to, messageContent, sendOptions);
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'document', { caption });
+      
       return res.status(200).json({ 
         ok: true, 
         messageId: sentMsg.key.id,
@@ -396,6 +726,10 @@ function createAccountRouter(accountId, socketManager) {
       };
       
       const sentMsg = await socketInfo.socket.sendMessage(chatId, reactionMessage);
+      
+      // Store the sent message in database
+      await storeSentMessage(sentMsg, 'text', {});
+      
       return res.status(200).json({ 
         ok: true,
         messageId: sentMsg.key.id
