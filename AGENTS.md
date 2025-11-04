@@ -2,10 +2,22 @@
 
 Scope: Entire repository
 
+## ⚠️ CRITICAL: Branch-First Development Policy
+
+**BEFORE making ANY code changes:**
+1. **ALWAYS create a new feature branch** from the current branch
+2. Branch naming convention: `feature/descriptive-name` or `fix/issue-description`
+3. Example: `git checkout -b feature/add-media-support`
+4. **NEVER commit directly to `master`, `main`, or `multi-acc-try`**
+5. After completing work, push the branch and inform the user for review
+
+**Exception:** Only skip branch creation if the user explicitly says "commit directly" or "no branch needed"
+
 ## Goals
 - Maintain a stable WhatsApp integration via Baileys with MongoDB-backed auth state.
 - Grow REST endpoints incrementally, keeping socket lifecycle separate from HTTP server.
 - Keep logging consistent and machine-parseable (JSON lines in `.logs/`).
+- Prioritize code safety and thorough testing before any changes.
 
 ## Conventions
 - CommonJS modules (do not add `"type": "module"` unless converting codebase).
@@ -39,10 +51,44 @@ Scope: Entire repository
   - `curl -X POST http://localhost:3000/webhooks -H 'content-type: application/json' -d '{"url":"https://example.com"}'`
 - Tail logs: `tail -f .logs/*.log`
 
+## Development Workflow
+
+### 1. Planning Phase
+- Read and understand the request
+- Check existing code patterns
+- Consult relevant documentation (Baileys/Express/MongoDB)
+- Create a todo list for complex tasks
+- Propose approach to user if uncertain
+
+### 2. Branch Creation (MANDATORY)
+```bash
+# Create descriptive feature branch
+git checkout -b feature/your-feature-name
+```
+
+### 3. Implementation Phase
+- Make small, incremental changes
+- Test each change manually
+- Keep commits atomic and focused
+- Update documentation as you go
+
+### 4. Testing Phase
+- Provide curl commands for user to test
+- Verify no breaking changes to existing functionality
+- Check logs for errors
+- Validate against API_DOCS.md
+
+### 5. Completion Phase
+- Commit with descriptive message
+- Push branch to remote
+- Summarize changes for user
+- **Do not merge** - let user review and merge
+
 ## PR/Commit Style
 - Small, focused changes.
-- Include rationale in commit messages (the “why”).
+- Include rationale in commit messages (the "why").
 - Update README and API_DOCS when adding/modifying endpoints.
+- Reference issue numbers if applicable.
 
 ## Security
 - Treat webhook URLs cautiously; avoid SSRF by restricting addresses/domains when implementing dispatch.
@@ -59,3 +105,32 @@ Scope: Entire repository
 - Express helpers: `server.js`.
 - Logging helpers: `logger.js`.
 - Webhook handler: `webhookHandler.js`.
+- Multi-account management: `accountManager.js`, `socketManager.js`
+- Per-account routing: `accountRouter.js`, `managementRoutes.js`
+
+## External Documentation References
+
+### Baileys (WhatsApp Library)
+- **Main repo**: https://github.com/WhiskeySockets/Baileys
+- **Key sections to reference**:
+  - Connection & Authentication: https://github.com/WhiskeySockets/Baileys#connecting
+  - Sending Messages: https://github.com/WhiskeySockets/Baileys#sending-messages
+  - Handling Events: https://github.com/WhiskeySockets/Baileys#handling-events
+  - Auth State: https://github.com/WhiskeySockets/Baileys#saving-and-restoring-sessions
+
+### Express.js
+- **Main docs**: https://expressjs.com/
+- **API Reference**: https://expressjs.com/en/api.html
+- **Routing guide**: https://expressjs.com/en/guide/routing.html
+- **Error handling**: https://expressjs.com/en/guide/error-handling.html
+
+### MongoDB Node.js Driver
+- **Main docs**: https://www.mongodb.com/docs/drivers/node/current/
+- **Quick reference**: https://www.mongodb.com/docs/drivers/node/current/quick-reference/
+
+## Agent Personality & Approach
+- **Cautious**: Always create branches, never rush changes
+- **Thorough**: Read docs before implementing, test before committing
+- **Communicative**: Explain reasoning, ask questions when uncertain
+- **Respectful**: This is production code for a WhatsApp integration - treat it carefully
+- **Methodical**: Plan → Research → Implement → Test → Document → Commit
