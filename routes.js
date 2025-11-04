@@ -1,3 +1,5 @@
+const { ObjectId, GridFSBucket } = require('mongodb');
+
 async function sendMessage(req, res, next) {
   const sock = req.app.locals.whatsapp_socket;
   const { to, message } = req.body || {};
@@ -13,6 +15,29 @@ async function sendMessage(req, res, next) {
     return res.status(200).json({ ok: true, messageId: sentMsg.key.id });
   } catch (err) {
     // console.error('Error sending message:', err);
+    return res.status(500).json({ ok: false, error: 'internal_error' });
+  }
+}
+
+async function fetchFile(req, res, next) {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ ok: false, error: 'id is required' });
+  }
+  try {
+    const { connectToDB } = require('./db');
+    const db = await connectToDB();
+    const bucket = new GridFSBucket(db, { bucketName: 'fs' });
+    const files = await bucket.find({ _id: new ObjectId(id) }).toArray();
+    if (files.length === 0) {
+      return res.status(404).json({ ok: false, error: 'file not found' });
+    }
+    const file = files[0];
+    res.set('Content-Type', file.contentType || 'application/octet-stream');
+    res.set('Content-Length', file.length);
+    bucket.openDownloadStream(file._id).pipe(res);
+  } catch (err) {
+    console.error('Error fetching file:', err);
     return res.status(500).json({ ok: false, error: 'internal_error' });
   }
 }
@@ -68,6 +93,11 @@ module.exports = {
           return res.status(500).json({ ok: false, error: 'internal_error' });
         }
       },
+    },
+    {
+      method: 'get',
+      path: '/files/:id',
+      handler: fetchFile,
     },
   ]
 };
