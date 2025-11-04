@@ -1,4 +1,5 @@
 const express = require('express');
+const { GridFSBucket, ObjectId } = require('mongodb');
 
 // Global management routes
 function createManagementRoutes(accountManager, socketManager, app) {
@@ -173,6 +174,33 @@ function createManagementRoutes(accountManager, socketManager, app) {
       });
     } catch (err) {
       console.error('GET /messages error:', err);
+      return res.status(500).json({ ok: false, error: 'internal_error' });
+    }
+  });
+
+  // Global media fetch by GridFS ID
+  router.get('/media/:id', async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ ok: false, error: 'id is required' });
+    }
+    try {
+      const { connectToDB } = require('./db');
+      const db = await connectToDB();
+      const bucket = new GridFSBucket(db, { bucketName: 'media' });
+      const files = await bucket.find({ _id: new ObjectId(id) }).toArray();
+      if (files.length === 0) {
+        return res.status(404).json({ ok: false, error: 'media not found' });
+      }
+      const file = files[0];
+      res.set('Content-Type', file.contentType || 'application/octet-stream');
+      res.set('Content-Length', file.length);
+      if (file.metadata && file.metadata.fileName) {
+        res.set('Content-Disposition', `inline; filename="${file.metadata.fileName}"`);
+      }
+      bucket.openDownloadStream(file._id).pipe(res);
+    } catch (err) {
+      console.error('Error fetching media:', err);
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });

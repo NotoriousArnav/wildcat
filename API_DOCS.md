@@ -58,6 +58,30 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously. Each account
 { "ok": false, "error": "internal_error" }
 ```
 
+### Fetch Media from GridFS
+- **Method:** `GET`
+- **Path:** `/media/:id`
+- **Description:** Fetch media stored in GridFS by its ObjectId (attachments from WhatsApp messages).
+- **Parameters:**
+  - `id` (required): The ObjectId of the media file in GridFS
+- **Response 200:**
+  - Content-Type: (media mimetype, e.g., `image/jpeg`, `video/mp4`)
+  - Content-Length: File size in bytes
+  - Content-Disposition: `inline; filename="..."` (if filename available)
+  - Body: Binary media data (streamed)
+- **Response 400:**
+```json
+{ "ok": false, "error": "id is required" }
+```
+- **Response 404:**
+```json
+{ "ok": false, "error": "media not found" }
+```
+- **Response 500:**
+```json
+{ "ok": false, "error": "internal_error" }
+```
+
 ### Register Webhook
 - **Method:** `POST`
 - **Path:** `/webhooks`
