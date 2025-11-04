@@ -37,9 +37,10 @@ class AudioConverter {
    * Convert audio buffer to OGG/Opus format for WhatsApp
    * @param {Buffer} inputBuffer - Input audio buffer
    * @param {string} originalMimetype - Original audio mimetype
+   * @param {boolean} isPtt - Is this a voice message (PTT) vs regular audio
    * @returns {Promise<Buffer>} - Converted audio buffer
    */
-  async convertToOggOpus(inputBuffer, originalMimetype = '') {
+  async convertToOggOpus(inputBuffer, originalMimetype = '', isPtt = false) {
     const available = await this.checkFfmpegAvailable();
     if (!available) {
       logger.warn('ffmpeg not available, sending audio without conversion');
@@ -66,23 +67,54 @@ class AudioConverter {
       // Write input buffer to temp file
       fs.writeFileSync(inputPath, inputBuffer);
 
-      // Convert using ffmpeg
+      // Convert using ffmpeg - STRIP EVERYTHING except audio stream
       // -vn: disable video (removes album art/thumbnails)
+      // -sn: disable subtitles
+      // -dn: disable data streams
+      // -map_metadata -1: strip ALL metadata
+      // -fflags +bitexact: ensure deterministic output
+      // -ar 16000: 16kHz sample rate (WhatsApp voice message standard)
       // -avoid_negative_ts make_zero: fixes timestamp issues
       // -ac 1: mono channel (required by WhatsApp)
       // -codec:a libopus: use Opus codec
-      // -b:a 128k: bitrate for decent quality
-      const ffmpeg = spawn(this.ffmpegPath, [
+      // -b:a: bitrate (24k for voice, 64k for music)
+      // -application voip: optimize for voice (only for PTT)
+      const ffmpegArgs = [
         '-i', inputPath,
-        '-vn', // No video stream - critical for WhatsApp
+        '-vn', // No video stream
+        '-sn', // No subtitle stream
+        '-dn', // No data stream
+        '-map_metadata', '-1', // Strip all metadata (title, artist, album, etc.)
+        '-fflags', '+bitexact', // Deterministic output
+        '-map', '0:a:0', // Only map first audio stream
+        '-ar', '16000', // 16kHz sample rate like real WhatsApp messages
         '-avoid_negative_ts', 'make_zero',
-        '-ac', '1',
-        '-codec:a', 'libopus',
-        '-b:a', '128k',
+        '-ac', '1' // Mono
+      ];
+
+      // Add codec and application-specific settings
+      if (isPtt) {
+        // Voice message settings (PTT - Push To Talk)
+        ffmpegArgs.push(
+          '-codec:a', 'libopus',
+          '-application', 'voip', // Optimize for voice
+          '-b:a', '24k' // Lower bitrate for voice
+        );
+      } else {
+        // Regular audio/music settings
+        ffmpegArgs.push(
+          '-codec:a', 'libopus',
+          '-b:a', '64k' // Higher bitrate for music quality
+        );
+      }
+
+      ffmpegArgs.push(
         '-f', 'ogg',
         '-y', // Overwrite output file
         outputPath
-      ]);
+      );
+
+      const ffmpeg = spawn(this.ffmpegPath, ffmpegArgs);
 
       let stderrData = '';
       

@@ -236,10 +236,12 @@ function createAccountRouter(accountId, socketManager) {
       // Convert audio to OGG/Opus format for WhatsApp compatibility
       let audioBuffer = req.file.buffer;
       let mimetype = 'audio/ogg; codecs=opus';
+      const isPtt = ptt === 'true' || ptt === true;
       
       if (audioConverter.needsConversion(req.file.mimetype)) {
         try {
-          audioBuffer = await audioConverter.convertToOggOpus(req.file.buffer, req.file.mimetype);
+          // Pass isPtt to converter for voice-optimized encoding
+          audioBuffer = await audioConverter.convertToOggOpus(req.file.buffer, req.file.mimetype, isPtt);
         } catch (conversionErr) {
           console.error(`Audio conversion failed for ${accountId}, sending original:`, conversionErr.message);
           // Fallback to original if conversion fails
@@ -251,7 +253,7 @@ function createAccountRouter(accountId, socketManager) {
       const messageContent = {
         audio: audioBuffer,
         mimetype: mimetype,
-        ptt: ptt === 'true' || ptt === true // Push-to-talk (voice message)
+        ptt: isPtt // Push-to-talk (voice message)
       };
       
       const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
