@@ -61,7 +61,11 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously. Each account
 ### List All Media Files
 - **Method:** `GET`
 - **Path:** `/media`
-- **Description:** List all media files stored in GridFS with their metadata and linked message info.
+- **Description:** List all media files stored in GridFS with their metadata and linked message info. Supports filtering by message ID, account ID, or chat ID.
+- **Query Parameters:**
+  - `messageId` (optional): Filter by specific message ID
+  - `accountId` (optional): Filter by account ID
+  - `chatId` (optional): Filter by chat ID
 - **Response 200:**
 ```json
 {
@@ -90,6 +94,7 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously. Each account
   ]
 }
 ```
+- **Example:** `GET /media?messageId=3EB0A12345678901` to find attachments for a specific message
 
 ### Fetch Media from GridFS
 - **Method:** `GET`

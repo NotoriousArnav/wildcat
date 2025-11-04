@@ -184,7 +184,20 @@ function createManagementRoutes(accountManager, socketManager, app) {
       const { connectToDB } = require('./db');
       const db = await connectToDB();
       const filesCollection = db.collection('media.files');
-      const files = await filesCollection.find({}).sort({ uploadDate: -1 }).toArray();
+      
+      // Build query from params
+      const query = {};
+      if (req.query.messageId) {
+        query['metadata.messageId'] = req.query.messageId;
+      }
+      if (req.query.accountId) {
+        query['metadata.accountId'] = req.query.accountId;
+      }
+      if (req.query.chatId) {
+        query['metadata.chatId'] = req.query.chatId;
+      }
+      
+      const files = await filesCollection.find(query).sort({ uploadDate: -1 }).toArray();
       
       const mediaList = files.map(file => ({
         id: file._id,
