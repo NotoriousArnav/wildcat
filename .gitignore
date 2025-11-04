@@ -6,3 +6,4 @@ logs/
 dist/
 
 .logs/
+test_audio/

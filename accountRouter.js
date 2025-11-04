@@ -72,6 +72,16 @@ function createAccountRouter(accountId, socketManager) {
               fromMe: quotedMsg.fromMe
             }
           };
+        } else {
+          // Fallback: message not in DB (likely outgoing message we sent)
+          // Try with fromMe=true
+          messageContent.quoted = {
+            key: {
+              remoteJid: to,
+              id: quotedMessageId,
+              fromMe: true
+            }
+          };
         }
       }
       
@@ -94,7 +104,7 @@ function createAccountRouter(accountId, socketManager) {
 
   // Send image message
   router.post('/message/send/image', upload.single('image'), async (req, res) => {
-    const { to, caption } = req.body || {};
+    const { to, caption, quotedMessageId } = req.body || {};
     
     if (!to) {
       return res.status(400).json({ ok: false, error: 'to field is required' });
@@ -119,6 +129,34 @@ function createAccountRouter(accountId, socketManager) {
         caption: caption || undefined,
         mimetype: req.file.mimetype
       };
+      
+      // Add quoted message if provided
+      if (quotedMessageId) {
+        const messagesCollection = db.collection('messages');
+        const quotedMsg = await messagesCollection.findOne({ 
+          messageId: quotedMessageId,
+          accountId 
+        });
+        
+        if (quotedMsg) {
+          messageContent.quoted = {
+            key: {
+              remoteJid: quotedMsg.chatId,
+              id: quotedMsg.messageId,
+              fromMe: quotedMsg.fromMe
+            }
+          };
+        } else {
+          // Fallback: message not in DB (likely outgoing message we sent)
+          messageContent.quoted = {
+            key: {
+              remoteJid: to,
+              id: quotedMessageId,
+              fromMe: true
+            }
+          };
+        }
+      }
       
       const sentMsg = await socketInfo.socket.sendMessage(to, messageContent);
       return res.status(200).json({ 

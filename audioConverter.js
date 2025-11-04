@@ -67,12 +67,14 @@ class AudioConverter {
       fs.writeFileSync(inputPath, inputBuffer);
 
       // Convert using ffmpeg
+      // -vn: disable video (removes album art/thumbnails)
       // -avoid_negative_ts make_zero: fixes timestamp issues
       // -ac 1: mono channel (required by WhatsApp)
       // -codec:a libopus: use Opus codec
       // -b:a 128k: bitrate for decent quality
       const ffmpeg = spawn(this.ffmpegPath, [
         '-i', inputPath,
+        '-vn', // No video stream - critical for WhatsApp
         '-avoid_negative_ts', 'make_zero',
         '-ac', '1',
         '-codec:a', 'libopus',
