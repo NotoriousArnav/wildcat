@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const { connectToDB } = require('./db');
 const MediaHandler = require('./mediaHandler');
+const audioConverter = require('./audioConverter');
 
 // Configure multer for memory storage
 const upload = multer({ 
@@ -194,9 +195,24 @@ function createAccountRouter(accountId, socketManager) {
     }
     
     try {
+      // Convert audio to OGG/Opus format for WhatsApp compatibility
+      let audioBuffer = req.file.buffer;
+      let mimetype = 'audio/ogg; codecs=opus';
+      
+      if (audioConverter.needsConversion(req.file.mimetype)) {
+        try {
+          audioBuffer = await audioConverter.convertToOggOpus(req.file.buffer, req.file.mimetype);
+        } catch (conversionErr) {
+          console.error(`Audio conversion failed for ${accountId}, sending original:`, conversionErr.message);
+          // Fallback to original if conversion fails
+          audioBuffer = req.file.buffer;
+          mimetype = req.file.mimetype;
+        }
+      }
+      
       const messageContent = {
-        audio: req.file.buffer,
-        mimetype: req.file.mimetype,
+        audio: audioBuffer,
+        mimetype: mimetype,
         ptt: ptt === 'true' || ptt === true // Push-to-talk (voice message)
       };
       
