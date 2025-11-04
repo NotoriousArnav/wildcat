@@ -13,7 +13,10 @@ async function connectionLogic() {
   const db = await connectToDB();
   const collection = db.collection("auth_info_baileys");
   const { state, saveCreds } = await useMongoDBAuthState(collection);
-  const sock = makeWASocket({auth: state}); require("./logger").wireSocketLogging(sock);
+  const sock = makeWASocket({
+    auth: state,
+    syncFullHistory: true,
+  }); require("./logger").wireSocketLogging(sock);
   const app = constructApp(sock);
 
   makeApp(app, routes);

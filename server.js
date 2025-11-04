@@ -7,7 +7,7 @@ const constructApp = function (whatsapp_socket){
   const app = express();
   app.locals.whatsapp_socket = whatsapp_socket;
   app.use(express.json());
-  app.use(httpLogger());
+  app.use(httpLogger({ redactBody: false }));
   return app;
 }
 

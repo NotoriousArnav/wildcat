@@ -2,14 +2,17 @@ async function sendMessage(req, res, next) {
   const sock = req.app.locals.whatsapp_socket;
   const { to, message } = req.body || {};
   if (!to || !message) {
-    return res.status(400).json({ ok: false, error: 'to and message are required' });
+    return res.status(400).json({
+      ok: false,
+      error: 'to and message are required'
+    });
   }
   try {
     const sentMsg = await sock.sendMessage(to, { text: message });
-    console.log(sentMsg);
+    // console.log(sentMsg);
     return res.status(200).json({ ok: true, messageId: sentMsg.key.id });
   } catch (err) {
-    console.error('Error sending message:', err);
+    // console.error('Error sending message:', err);
     return res.status(500).json({ ok: false, error: 'internal_error' });
   }
 }
