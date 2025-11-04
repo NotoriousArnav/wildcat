@@ -14,10 +14,12 @@ NOTE: This project is a work in progress. Features like REST endpoints and CRM/w
 - ✅ **Multi-Account Support**: Manage multiple WhatsApp accounts simultaneously
 - ✅ **Separate Collections**: Each account uses its own MongoDB collection for isolation
 - ✅ **Dynamic Routing**: Per-account API endpoints automatically mounted
+- ✅ **Account Persistence**: Accounts auto-restore on server restart with intelligent reconnection
 - ✅ **Message Handling**: Send/receive messages per account with webhook support
 - ✅ **REST API**: Full REST interface for account management and messaging
 - ✅ **Auto-Reconnection**: Intelligent reconnection logic per account
 - ✅ **QR Code Authentication**: Terminal-based QR scanning for each account
+- ✅ **CLI Helper**: npm scripts for common operations (see `CLI_USAGE.md`)
 
 ---
 
@@ -97,6 +99,29 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously:
 
 ## Quick Start
 
+### Using CLI Helper (Recommended)
+
+The project includes a CLI helper for easier interaction. See `CLI_USAGE.md` for full documentation.
+
+```bash
+# List all accounts
+npm run accounts
+
+# Create account
+npm run account:create mybusiness "Business Account"
+
+# Check status and get QR code
+npm run account:status mybusiness
+
+# Send message
+npm run message:send mybusiness 1234567890@s.whatsapp.net "Hello!"
+
+# View help
+npm run cli
+```
+
+### Using curl
+
 ### 1. Create Your First Account
 
 ```bash
@@ -170,18 +195,21 @@ All endpoints are prefixed with `/accounts/:accountId/`
 
 ```
 wildcat/
-├── index.js                 # Main entry point - multi-account initialization
-├── socketManager.js         # NEW: Manages WhatsApp sockets per account
-├── accountManager.js        # NEW: Account CRUD and metadata
-├── accountRouter.js         # NEW: Per-account route handlers
-├── managementRoutes.js      # NEW: Global management routes
+├── index.js                 # Main entry point - multi-account initialization & restoration
+├── socketManager.js         # Manages WhatsApp sockets per account
+├── accountManager.js        # Account CRUD and metadata
+├── accountRouter.js         # Per-account route handlers
+├── managementRoutes.js      # Global management routes
 ├── mongoAuthState.js        # MongoDB-backed Baileys auth state (per collection)
 ├── server.js                # Express app construction and server startup
 ├── db.js                    # MongoDB connection utility
 ├── webhookHandler.js        # Webhook dispatch helper
 ├── logger.js                # JSON logging utilities
+├── scripts/
+│   └── cli.js               # CLI helper for common operations
 ├── routes.js                # LEGACY: Old single-account routes
 ├── API_DOCS.md              # Comprehensive API documentation
+├── CLI_USAGE.md             # CLI helper documentation and examples
 ├── AGENTS.md                # Development guidelines for AI agents
 ├── README.md                # This file
 ├── .env.example             # Environment variable template
@@ -198,6 +226,11 @@ wildcat/
    - Creates `SocketManager` and `AccountManager` instances
    - Connects to MongoDB
    - Sets up Express app with management routes
+   - **Restores existing accounts from database:**
+     - Automatically mounts routes for all accounts in DB
+     - Auto-connects accounts that were previously connected (status !== 'created')
+     - Skips auto-connect for never-connected accounts (status: 'created')
+     - Gracefully handles restoration errors without preventing server start
    - Starts HTTP server
 
 2. **Account Creation (`POST /accounts`):**
@@ -369,13 +402,15 @@ If you're upgrading from the single-account version:
 - ✅ Per-account routing and socket management
 - ✅ Message sending per account
 - ✅ Webhook delivery with accountId
+- ✅ Account persistence and auto-restoration on restart
+- ✅ CLI helper with npm scripts
+- ✅ Message history API (GET /messages)
 - 🔄 Media message support (images, videos, documents)
 - 🔄 Group management endpoints
 - 🔄 Webhook signing/verification
 - 🔄 GET/DELETE webhook endpoints
 - 🔄 Authentication and rate limiting
 - 🔄 Account-specific webhook configuration
-- 🔄 Message history API per account
 - 🔄 Bulk messaging operations
 
 ---
