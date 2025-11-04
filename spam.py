@@ -6,7 +6,7 @@ headers = {
 }
 
 json_data = {
-    'to': '919163827035@s.whatsapp.net',
+    'to': 'yournumber@s.whatsapp.net',
     'message': 'Damn boi',
 }
 

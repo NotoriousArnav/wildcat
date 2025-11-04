@@ -73,6 +73,9 @@ class SocketManager {
       } else if (connection === 'open') {
         socketInfo.status = 'connected';
         console.log(`Account ${accountId} connected successfully!`);
+        if (process.env.ADMIN_NUMBER) {
+          await sock.sendMessage(process.env.ADMIN_NUMBER, { text: `✅ Account ${accountId} connected successfully!` });
+        }
       }
     });
 
