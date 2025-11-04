@@ -1,3 +1,4 @@
+// Uses WhatsApp socket from app.locals to send a message
 async function sendMessage(req, res, next) {
   const sock = req.app.locals.whatsapp_socket;
   const { to, message } = req.body || {};
@@ -14,24 +15,8 @@ async function sendMessage(req, res, next) {
   }
 }
 
-module.exports = {
-  routes: [
-    {
-      method: 'post',
-      path: '/message/send',
-      handler: sendMessage,
-    },
-    {
-      method: 'get',
-      path: '/ping',
-      handler: (req, res) => {
-        res.status(200).json({ ok: true, pong: true, time: new Date().toISOString() });
-      },
-    },
-    {
-      method: 'post',
-      path: '/webhooks',
-      handler: async (req, res) => {
+// Registers a webhook URL to receive incoming messages
+async function webhookHandler (req, res) {
         try {
           const { url } = req.body || {};
           if (!url || typeof url !== 'string') {
@@ -64,7 +49,26 @@ module.exports = {
           console.error('POST /webhooks error:', err);
           return res.status(500).json({ ok: false, error: 'internal_error' });
         }
+}
+
+module.exports = {
+  routes: [
+    {
+      method: 'post',
+      path: '/message/send',
+      handler: sendMessage,
+    },
+    {
+      method: 'get',
+      path: '/ping',
+      handler: (req, res) => {
+        res.status(200).json({ ok: true, pong: true, time: new Date().toISOString() });
       },
+    },
+    {
+      method: 'post',
+      path: '/webhooks',
+      handler: webhookHandler,
     },
   ]
 };

@@ -1,3 +1,4 @@
+//This Program handles an Unofficial API using Baileys to connect to WhatsApp Web using WebSockets and Expressjs server.
 require("dotenv").config();
 const { DisconnectReason, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const makeWASocket = require("@whiskeysockets/baileys").default;
@@ -13,7 +14,8 @@ async function connectionLogic() {
   const db = await connectToDB();
   const collection = db.collection("auth_info_baileys");
   const { state, saveCreds } = await useMongoDBAuthState(collection);
-  const sock = makeWASocket({auth: state}); require("./logger").wireSocketLogging(sock);
+  const sock = makeWASocket({auth: state});
+  require("./logger").wireSocketLogging(sock);
   const app = constructApp(sock);
 
   makeApp(app, routes);
