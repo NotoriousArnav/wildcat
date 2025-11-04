@@ -58,6 +58,39 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously. Each account
 { "ok": false, "error": "internal_error" }
 ```
 
+### List All Media Files
+- **Method:** `GET`
+- **Path:** `/media`
+- **Description:** List all media files stored in GridFS with their metadata and linked message info.
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "media": [
+    {
+      "id": "507f1f77bcf86cd799439011",
+      "filename": "account1_123456789012345678901_1699099199000",
+      "contentType": "image/jpeg",
+      "length": 1024000,
+      "uploadDate": "2025-11-04T09:49:25.526Z",
+      "metadata": {
+        "accountId": "mybusiness",
+        "messageId": "3EB0A12345678901",
+        "chatId": "1234567890@s.whatsapp.net",
+        "uploadedAt": "2025-11-04T09:49:25.526Z",
+        "mediaType": "image",
+        "mimetype": "image/jpeg",
+        "caption": null,
+        "fileName": null,
+        "fileLength": 1024000,
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  ]
+}
+```
+
 ### Fetch Media from GridFS
 - **Method:** `GET`
 - **Path:** `/media/:id`

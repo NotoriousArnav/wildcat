@@ -178,6 +178,30 @@ function createManagementRoutes(accountManager, socketManager, app) {
     }
   });
 
+  // List all media files
+  router.get('/media', async (req, res) => {
+    try {
+      const { connectToDB } = require('./db');
+      const db = await connectToDB();
+      const filesCollection = db.collection('media.files');
+      const files = await filesCollection.find({}).sort({ uploadDate: -1 }).toArray();
+      
+      const mediaList = files.map(file => ({
+        id: file._id,
+        filename: file.filename,
+        contentType: file.contentType,
+        length: file.length,
+        uploadDate: file.uploadDate,
+        metadata: file.metadata
+      }));
+      
+      return res.status(200).json({ ok: true, media: mediaList });
+    } catch (err) {
+      console.error('Error listing media:', err);
+      return res.status(500).json({ ok: false, error: 'internal_error' });
+    }
+  });
+
   // Global media fetch by GridFS ID
   router.get('/media/:id', async (req, res) => {
     const { id } = req.params;
