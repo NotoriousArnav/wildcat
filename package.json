@@ -1,7 +1,7 @@
 {
   "name": "wildcat",
-  "version": "1.0.0",
-  "description": "Whatsapp Integration Layer for Data Connectivity and Transfer",
+  "version": "2.0.0",
+  "description": "Multi-Account WhatsApp Integration Layer for Data Connectivity and Transfer",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js"

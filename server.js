@@ -3,19 +3,11 @@ const express = require('express');
 
 const { httpLogger } = require('./logger');
 
-const constructApp = function (whatsapp_socket){
+const constructApp = function (){
   const app = express();
-  app.locals.whatsapp_socket = whatsapp_socket;
   app.use(express.json());
   app.use(httpLogger({ redactBody: false }));
   return app;
-}
-
-const makeApp = (app, routes) => {
-  routes.forEach((route) => {
-    const { path, method, handler } = route;
-    app[method](path, handler);
-  });
 }
 
 const startServer = async (app) => {
@@ -34,7 +26,6 @@ const startServer = async (app) => {
 }
 
 module.exports = {
-  makeApp,
   startServer,
   constructApp
 }

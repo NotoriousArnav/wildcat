@@ -1,83 +1,39 @@
 require("dotenv").config();
-const { DisconnectReason, useMultiFileAuthState } = require("@whiskeysockets/baileys");
-const makeWASocket = require("@whiskeysockets/baileys").default;
-const useMongoDBAuthState = require("./mongoAuthState");
-const qrcode = require("qrcode-terminal");
 
-const { connectToDB } = require("./db");
-const { startServer, makeApp, constructApp } = require("./server");
-const { routes } = require("./routes");
-const { sendToWebhook } = require("./webhookHandler");
+const { constructApp, startServer } = require("./server");
+const SocketManager = require("./socketManager");
+const AccountManager = require("./accountManager");
+const { createManagementRoutes } = require("./managementRoutes");
 
-async function connectionLogic() {
-  const db = await connectToDB();
-  const collection = db.collection("auth_info_baileys");
-  const { state, saveCreds } = await useMongoDBAuthState(collection);
-  const sock = makeWASocket({
-    auth: state,
-    syncFullHistory: true,
-  }); require("./logger").wireSocketLogging(sock);
-  const app = constructApp(sock);
+async function main() {
+  console.log("Initializing multi-account WhatsApp API...");
 
-  makeApp(app, routes);
+  // Initialize managers
+  const socketManager = new SocketManager();
+  const accountManager = new AccountManager();
 
-  // Handle Login and Reconnection
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect, qr } = update || {};
-    if (qr) { qrcode.generate(qr, { small: true });}
-    if (connection === "close") {
-      const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-      if (shouldReconnect) { connectionLogic(); }
-    }
-  });
+  await socketManager.init();
+  await accountManager.init();
 
-  sock.ev.on("creds.update", saveCreds); // Save credentials whenever updated
+  console.log("Managers initialized successfully!");
 
-  sock.ev.on("messages.update", (messageInfo) => {}); // Listen for message updates
+  // Create Express app
+  const app = constructApp();
 
-  // Listen for incoming messages
-  sock.ev.on("messages.upsert", (messageInfoUpsert) => {
-    if (messageInfoUpsert.type === "notify") {
-      const messages = messageInfoUpsert.messages;
+  // Mount management routes (account creation, listing, deletion, webhooks, ping)
+  const managementRouter = createManagementRoutes(accountManager, socketManager, app);
+  app.use('/', managementRouter);
 
-      // Make message history in DB
-      const messagesCollection = db.collection("messages");
-      messages.forEach(async (msg) => {
-        await messagesCollection.insertOne({
-          id: msg.key.id,
-          from: msg.key.remoteJid,
-          message: msg.message,
-          timestamp: msg.messageTimestamp,
-          fromMe: msg.key.fromMe,
-        });
-      });
+  // Start server
+  await startServer(app);
 
-      // Webhooks
-      messages.forEach(async (msg) => {
-        if (!msg.key.fromMe && msg.message) {
-          // Send to webhook
-          const payload = {
-            id: msg.key.id,
-            from: msg.key.remoteJid,
-            message: msg.message,
-            timestamp: msg.messageTimestamp,
-          };
-          // Fetch webhooks from DB
-          const webhooksCollection = db.collection("webhooks");
-          const webhooks = await webhooksCollection.find({}).toArray();
-          for (const webhook of webhooks) {
-            const result = await sendToWebhook(webhook.url, payload);
-            if (!result.ok) {
-              console.error(`Failed to send message to webhook ${webhook.url}:`, result.error);
-            }
-          }
-        }
-      });
-
-    }
-  });
-
-  startServer(app);
+  console.log("Multi-account API is ready!");
+  console.log("- Create accounts: POST /accounts");
+  console.log("- List accounts: GET /accounts");
+  console.log("- Account endpoints: /accounts/:accountId/...");
 }
 
-connectionLogic(); // Start the connection logic
+main().catch((err) => {
+  console.error("Fatal error during startup:", err);
+  process.exit(1);
+});
