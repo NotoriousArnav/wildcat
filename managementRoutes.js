@@ -85,6 +85,19 @@ function createManagementRoutes(accountManager, socketManager, app) {
       // Delete account record
       const collectionName = await accountManager.deleteAccount(accountId);
       
+      // Ensure collection is dropped (fallback if socket wasn't connected)
+      if (collectionName) {
+        try {
+          const { connectToDB } = require('./db');
+          const db = await connectToDB();
+          await db.collection(collectionName).drop();
+          console.log(`Dropped collection: ${collectionName}`);
+        } catch (dropErr) {
+          // Collection might not exist or already dropped - ignore
+          console.log(`Collection ${collectionName} may already be dropped or not exist`);
+        }
+      }
+      
       return res.status(200).json({ 
         ok: true, 
         message: 'Account deleted',
