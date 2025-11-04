@@ -181,25 +181,30 @@ All per-account endpoints are mounted under `/accounts/:accountId/`
 }
 ```
 
-### Send Message
+### Send Text Message
 - **Method:** `POST`
 - **Path:** `/accounts/:accountId/message/send`
-- **Description:** Send a text message via this account.
+- **Description:** Send a text message via this account. Supports replies/quotes and mentions.
 - **Request Body:**
 ```json
 {
   "to": "1234567890@s.whatsapp.net",
-  "message": "Hello from Wildcat!"
+  "message": "Hello from Wildcat!",
+  "quotedMessageId": "3EB0A12345678901",  // optional: reply to a message
+  "mentions": ["1234567890@s.whatsapp.net"]  // optional: mention users
 }
 ```
 - **Parameters:**
-  - `to`: WhatsApp JID (format: `number@s.whatsapp.net` or `groupid@g.us`)
-  - `message`: Text message to send
+  - `to` (required): WhatsApp JID (format: `number@s.whatsapp.net` or `groupid@g.us`)
+  - `message` (required): Text message to send
+  - `quotedMessageId` (optional): ID of message to quote/reply to
+  - `mentions` (optional): Array of WhatsApp JIDs to mention
 - **Response 200:**
 ```json
 {
   "ok": true,
-  "messageId": "3EB0A12345678901"
+  "messageId": "3EB0A12345678901",
+  "timestamp": 1699099199
 }
 ```
 - **Response 400:**
@@ -208,6 +213,254 @@ All per-account endpoints are mounted under `/accounts/:accountId/`
   "ok": false,
   "error": "Account not connected",
   "status": "connecting"
+}
+```
+
+### Send Image
+- **Method:** `POST`
+- **Path:** `/accounts/:accountId/message/send/image`
+- **Description:** Send an image with optional caption.
+- **Content-Type:** `multipart/form-data`
+- **Form Fields:**
+  - `image` (file, required): Image file to send
+  - `to` (text, required): WhatsApp JID
+  - `caption` (text, optional): Image caption
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "messageId": "3EB0A12345678901",
+  "timestamp": 1699099199
+}
+```
+- **Example:**
+```bash
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send/image \
+  -F "image=@/path/to/image.jpg" \
+  -F "to=1234567890@s.whatsapp.net" \
+  -F "caption=Check out this image!"
+```
+
+### Send Video
+- **Method:** `POST`
+- **Path:** `/accounts/:accountId/message/send/video`
+- **Description:** Send a video with optional caption.
+- **Content-Type:** `multipart/form-data`
+- **Form Fields:**
+  - `video` (file, required): Video file to send
+  - `to` (text, required): WhatsApp JID
+  - `caption` (text, optional): Video caption
+  - `gifPlayback` (boolean, optional): Play as GIF (default: false)
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "messageId": "3EB0A12345678901",
+  "timestamp": 1699099199
+}
+```
+
+### Send Audio
+- **Method:** `POST`
+- **Path:** `/accounts/:accountId/message/send/audio`
+- **Description:** Send audio or voice message.
+- **Content-Type:** `multipart/form-data`
+- **Form Fields:**
+  - `audio` (file, required): Audio file to send
+  - `to` (text, required): WhatsApp JID
+  - `ptt` (boolean, optional): Send as voice message/PTT (default: false)
+- **Important:** For best compatibility across all devices, audio should be encoded as:
+  - **Format:** OGG with Opus codec (`libopus`)
+  - **Channels:** Mono (1 channel)
+  - **Example ffmpeg command:**
+    ```bash
+    ffmpeg -i input.mp3 -avoid_negative_ts make_zero -ac 1 -codec:a libopus output.ogg
+    ```
+  - Other formats like MP3/M4A may work but compatibility varies
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "messageId": "3EB0A12345678901",
+  "timestamp": 1699099199
+}
+```
+
+### Send Document
+- **Method:** `POST`
+- **Path:** `/accounts/:accountId/message/send/document`
+- **Description:** Send a document file.
+- **Content-Type:** `multipart/form-data`
+- **Form Fields:**
+  - `document` (file, required): Document file to send
+  - `to` (text, required): WhatsApp JID
+  - `caption` (text, optional): Document caption
+  - `fileName` (text, optional): Custom filename (defaults to original)
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "messageId": "3EB0A12345678901",
+  "timestamp": 1699099199
+}
+```
+
+### React to Message
+- **Method:** `POST`
+- **Path:** `/accounts/:accountId/message/react`
+- **Description:** Send a reaction emoji to a message. Send empty emoji to remove reaction.
+- **Important:** The message must exist in the database for the reaction to work. Only react to messages that have been received/stored via webhook events.
+- **Request Body:**
+```json
+{
+  "chatId": "1234567890@s.whatsapp.net",
+  "messageId": "3EB0A12345678901",
+  "emoji": "👍"
+}
+```
+- **Parameters:**
+  - `chatId` (required): WhatsApp JID of the chat
+  - `messageId` (required): ID of message to react to (must be stored in database)
+  - `emoji` (optional): Emoji to react with (empty string removes reaction)
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "messageId": "3EB0B98765432109"
+}
+```
+- **Response 404:**
+```json
+{
+  "ok": false,
+  "error": "Message not found in database"
+}
+```
+
+### Delete Message
+- **Method:** `POST`
+- **Path:** `/accounts/:accountId/message/delete`
+- **Description:** Delete a message you sent.
+- **Request Body:**
+```json
+{
+  "chatId": "1234567890@s.whatsapp.net",
+  "messageId": "3EB0A12345678901"
+}
+```
+- **Parameters:**
+  - `chatId` (required): WhatsApp JID of the chat
+  - `messageId` (required): ID of message to delete
+- **Response 200:**
+```json
+{
+  "ok": true
+}
+```
+
+### Get Message by ID
+- **Method:** `GET`
+- **Path:** `/accounts/:accountId/messages/:messageId`
+- **Description:** Retrieve a specific message by its ID.
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "message": {
+    "accountId": "mybusiness",
+    "messageId": "3EB0A12345678901",
+    "chatId": "1234567890@s.whatsapp.net",
+    "from": "1234567890@s.whatsapp.net",
+    "fromMe": false,
+    "timestamp": 1699099199,
+    "type": "text",
+    "text": "Hello!",
+    "hasMedia": false,
+    "quotedMessage": null,
+    "mentions": [],
+    "isForwarded": false,
+    "createdAt": "2025-11-04T09:49:25.526Z"
+  }
+}
+```
+
+### Get Chat Messages
+- **Method:** `GET`
+- **Path:** `/accounts/:accountId/chats/:chatId/messages`
+- **Description:** Retrieve all messages for a specific chat with pagination.
+- **Query Parameters:**
+  - `limit` (optional, default: 50): Number of messages to return
+  - `offset` (optional, default: 0): Pagination offset
+  - `before` (optional): Get messages before this timestamp
+  - `after` (optional): Get messages after this timestamp
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "messages": [
+    {
+      "accountId": "mybusiness",
+      "messageId": "3EB0A12345678901",
+      "chatId": "1234567890@s.whatsapp.net",
+      "text": "Hello!",
+      "type": "text",
+      "hasMedia": false,
+      "mediaUrl": null,
+      "timestamp": 1699099199
+    }
+  ],
+  "pagination": {
+    "total": 150,
+    "limit": 50,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+### Get All Chats
+- **Method:** `GET`
+- **Path:** `/accounts/:accountId/chats`
+- **Description:** Get list of all chats for this account with last message info.
+- **Response 200:**
+```json
+{
+  "ok": true,
+  "chats": [
+    {
+      "chatId": "1234567890@s.whatsapp.net",
+      "messageCount": 25,
+      "lastMessage": {
+        "messageId": "3EB0A12345678901",
+        "text": "Latest message",
+        "type": "text",
+        "timestamp": 1699099199,
+        "fromMe": true
+      }
+    }
+  ]
+}
+```
+
+### Get Media for Message
+- **Method:** `GET`
+- **Path:** `/accounts/:accountId/messages/:messageId/media`
+- **Description:** Download the media file associated with a message.
+- **Response 200:**
+  - Content-Type: (media mimetype, e.g., `image/jpeg`, `video/mp4`)
+  - Content-Disposition: `inline; filename="..."`
+  - Body: Binary media data (streamed)
+- **Response 404:**
+```json
+{
+  "ok": false,
+  "error": "Message not found" 
+}
+```
+```json
+{
+  "ok": false,
+  "error": "Message has no media"
 }
 ```
 
@@ -241,11 +494,44 @@ Global webhook configuration for receiving message events from all accounts.
 - **Webhook Payload Format:**
 ```json
 {
-  "accountId": "account1",
-  "id": "3EB0A12345678901",
+  "accountId": "mybusiness",
+  "messageId": "3EB0A12345678901",
+  "chatId": "1234567890@s.whatsapp.net",
   "from": "1234567890@s.whatsapp.net",
-  "message": { "conversation": "Hello!" },
-  "timestamp": 1699099199
+  "fromMe": false,
+  "timestamp": 1699099199,
+  "type": "text",
+  "text": "Hello!",
+  "hasMedia": false,
+  "mediaUrl": null,
+  "mediaType": null,
+  "quotedMessage": {
+    "messageId": "3EB0A00000000000",
+    "participant": "9876543210@s.whatsapp.net",
+    "text": "Previous message",
+    "hasMedia": false
+  },
+  "mentions": ["1234567890@s.whatsapp.net"],
+  "createdAt": "2025-11-04T09:49:25.526Z"
+}
+```
+- **Media Message Example:**
+```json
+{
+  "accountId": "mybusiness",
+  "messageId": "3EB0A12345678902",
+  "chatId": "1234567890@s.whatsapp.net",
+  "from": "1234567890@s.whatsapp.net",
+  "fromMe": false,
+  "timestamp": 1699099199,
+  "type": "image",
+  "text": "Check this out!",
+  "hasMedia": true,
+  "mediaUrl": "/accounts/mybusiness/messages/3EB0A12345678902/media",
+  "mediaType": "image",
+  "quotedMessage": null,
+  "mentions": [],
+  "createdAt": "2025-11-04T09:49:25.526Z"
 }
 ```
 
@@ -279,12 +565,93 @@ curl http://localhost:3000/accounts/mybusiness/status
 
 ### Send a Message
 ```bash
+# Send text message
 curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
   -H 'Content-Type: application/json' \
   -d '{
     "to": "1234567890@s.whatsapp.net",
     "message": "Hello from Wildcat API!"
   }'
+
+# Send reply to a message
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "to": "1234567890@s.whatsapp.net",
+    "message": "This is a reply!",
+    "quotedMessageId": "3EB0A12345678901"
+  }'
+
+# Send message with mentions
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "to": "groupid@g.us",
+    "message": "Hello @user!",
+    "mentions": ["1234567890@s.whatsapp.net"]
+  }'
+```
+
+### Send Media Messages
+```bash
+# Send image
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send/image \
+  -F "image=@/path/to/image.jpg" \
+  -F "to=1234567890@s.whatsapp.net" \
+  -F "caption=Check out this image!"
+
+# Send video
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send/video \
+  -F "video=@/path/to/video.mp4" \
+  -F "to=1234567890@s.whatsapp.net" \
+  -F "caption=Watch this!"
+
+# Send audio
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send/audio \
+  -F "audio=@/path/to/audio.mp3" \
+  -F "to=1234567890@s.whatsapp.net" \
+  -F "ptt=true"
+
+# Send document
+curl -X POST http://localhost:3000/accounts/mybusiness/message/send/document \
+  -F "document=@/path/to/file.pdf" \
+  -F "to=1234567890@s.whatsapp.net" \
+  -F "fileName=report.pdf"
+```
+
+### React and Delete Messages
+```bash
+# React to message
+curl -X POST http://localhost:3000/accounts/mybusiness/message/react \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "chatId": "1234567890@s.whatsapp.net",
+    "messageId": "3EB0A12345678901",
+    "emoji": "👍"
+  }'
+
+# Delete message
+curl -X POST http://localhost:3000/accounts/mybusiness/message/delete \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "chatId": "1234567890@s.whatsapp.net",
+    "messageId": "3EB0A12345678901"
+  }'
+```
+
+### Retrieve Messages and Media
+```bash
+# Get specific message
+curl http://localhost:3000/accounts/mybusiness/messages/3EB0A12345678901
+
+# Get chat messages with pagination
+curl "http://localhost:3000/accounts/mybusiness/chats/1234567890@s.whatsapp.net/messages?limit=20&offset=0"
+
+# Get all chats
+curl http://localhost:3000/accounts/mybusiness/chats
+
+# Download media
+curl http://localhost:3000/accounts/mybusiness/messages/3EB0A12345678901/media -o downloaded_media.jpg
 ```
 
 ### List All Accounts
@@ -306,7 +673,12 @@ curl -X POST http://localhost:3000/webhooks \
 - ✅ Per-account routing and socket management
 - ✅ Message sending per account
 - ✅ Webhook delivery with accountId
-- 🔄 Media message support (images, videos, documents)
+- ✅ Media message support (images, videos, audio, documents)
+- ✅ Message replies/quotes and mentions
+- ✅ Message reactions
+- ✅ Full chat history storage with GridFS
+- ✅ Media retrieval endpoints for CRM integration
+- ✅ Message retrieval and pagination
 - 🔄 Group management endpoints
 - 🔄 Webhook signing/verification
 - 🔄 GET/DELETE webhook endpoints

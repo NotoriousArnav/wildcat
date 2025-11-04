@@ -48,7 +48,7 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously:
 
 - **Name:** `wildcat`
 - **Version:** `2.0.0` (Multi-Account)
-- **Description:** Multi-Account WhatsApp Integration Layer for Data Connectivity and Transfer
+- **Description:** WhatsApp Integration Layer for Data Connectivity and Transfer
 - **Entry:** `index.js`
 - **Script(s):** `dev` → `nodemon index.js`
 - **License:** GPL-3.0-only (see `LICENSE`)

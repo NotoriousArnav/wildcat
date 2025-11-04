@@ -4,15 +4,18 @@ const useMongoDBAuthState = require("./mongoAuthState");
 const qrcode = require("qrcode-terminal");
 const { connectToDB } = require("./db");
 const { wireSocketLogging } = require("./logger");
+const MediaHandler = require("./mediaHandler");
 
 class SocketManager {
   constructor() {
     this.sockets = new Map(); // accountId -> { socket, status, qr, collection, etc. }
     this.db = null;
+    this.mediaHandler = null;
   }
 
   async init() {
     this.db = await connectToDB();
+    this.mediaHandler = new MediaHandler(this.db);
   }
 
   async createSocket(accountId, collectionName) {
@@ -75,49 +78,117 @@ class SocketManager {
 
     sock.ev.on("creds.update", saveCreds);
 
-    // Handle messages per account
+    // Handle messages per account with media and context support
     sock.ev.on("messages.upsert", async (messageInfoUpsert) => {
       if (messageInfoUpsert.type === "notify") {
         const messages = messageInfoUpsert.messages;
-
-        // Store messages with accountId
         const messagesCollection = this.db.collection("messages");
-        messages.forEach(async (msg) => {
-          await messagesCollection.insertOne({
-            accountId,
-            id: msg.key.id,
-            from: msg.key.remoteJid,
-            to: msg.key.remoteJid, // The JID this message is associated with
-            message: msg.message,
-            timestamp: msg.messageTimestamp,
-            fromMe: msg.key.fromMe,
-            createdAt: new Date(),
-          });
-        });
 
-        // Webhooks (global)
-        const { sendToWebhook } = require("./webhookHandler");
-        messages.forEach(async (msg) => {
-          if (!msg.key.fromMe && msg.message) {
-            const payload = {
+        // Process each message
+        for (const msg of messages) {
+          try {
+            // Extract text content
+            const textContent = this._extractTextContent(msg);
+            
+            // Check for media
+            const hasMedia = this.mediaHandler.hasMedia(msg);
+            let mediaInfo = null;
+
+            if (hasMedia) {
+              try {
+                // Download and store media
+                mediaInfo = await this.mediaHandler.downloadAndStoreMedia(
+                  msg,
+                  accountId,
+                  sock.updateMediaMessage
+                );
+                console.log(`Media stored for message ${msg.key.id}: ${mediaInfo.mediaType}`);
+              } catch (err) {
+                console.error(`Failed to download media for ${msg.key.id}:`, err.message);
+              }
+            }
+
+            // Extract message context (replies, mentions)
+            const quotedMessage = this.mediaHandler.extractQuotedMessage(msg);
+            const mentions = this.mediaHandler.extractMentions(msg);
+
+            // Build enhanced message document
+            const messageDoc = {
               accountId,
-              id: msg.key.id,
+              messageId: msg.key.id,
+              chatId: msg.key.remoteJid,
               from: msg.key.remoteJid,
-              to: msg.key.remoteJid, // The JID this message is associated with
-              message: msg.message,
-              timestamp: msg.messageTimestamp,
               fromMe: msg.key.fromMe,
+              timestamp: msg.messageTimestamp,
+              
+              // Message type and content
+              type: mediaInfo ? mediaInfo.mediaType : 'text',
+              text: textContent,
+              
+              // Media information
+              hasMedia,
+              ...(mediaInfo && {
+                mediaType: mediaInfo.mediaType,
+                mediaGridFsId: mediaInfo.gridFsId.toString(),
+                mediaUrl: this.mediaHandler.getMediaUrl(accountId, msg.key.id),
+                mediaSize: mediaInfo.size,
+                mediaMimetype: mediaInfo.mimetype,
+                mediaFileName: mediaInfo.fileName,
+                caption: mediaInfo.caption,
+                mediaWidth: mediaInfo.width,
+                mediaHeight: mediaInfo.height,
+              }),
+              
+              // Message context
+              quotedMessage,
+              mentions,
+              
+              // Additional metadata
+              isForwarded: msg.message?.extendedTextMessage?.contextInfo?.isForwarded || false,
+              
+              // Timestamps
+              createdAt: new Date(),
+              updatedAt: new Date(),
             };
+
+            // Store in MongoDB
+            await messagesCollection.insertOne(messageDoc);
+
+            // Send webhooks
+            const { sendToWebhook } = require("./webhookHandler");
             const webhooksCollection = this.db.collection("webhooks");
             const webhooks = await webhooksCollection.find({}).toArray();
+            
+            // Prepare webhook payload
+            const webhookPayload = {
+              accountId,
+              messageId: msg.key.id,
+              chatId: msg.key.remoteJid,
+              from: msg.key.remoteJid,
+              fromMe: msg.key.fromMe,
+              timestamp: msg.messageTimestamp,
+              type: messageDoc.type,
+              text: textContent,
+              hasMedia,
+              mediaUrl: mediaInfo ? messageDoc.mediaUrl : null,
+              mediaType: mediaInfo ? mediaInfo.mediaType : null,
+              quotedMessage,
+              mentions,
+              createdAt: messageDoc.createdAt,
+            };
+
+            // Send to all registered webhooks
             for (const webhook of webhooks) {
-              const result = await sendToWebhook(webhook.url, payload);
+              const result = await sendToWebhook(webhook.url, webhookPayload);
               if (!result.ok) {
                 console.error(`Failed to send message to webhook ${webhook.url}:`, result.error);
               }
             }
+
+          } catch (err) {
+            console.error(`Error processing message ${msg.key.id}:`, err);
           }
-        });
+        }
       }
     });
 
@@ -155,6 +226,28 @@ class SocketManager {
       // Delete the entire collection for this account
       await this.db.collection(info.collection).drop();
     }
+  }
+
+  /**
+   * Extract text content from Baileys message
+   * @private
+   */
+  _extractTextContent(message) {
+    const msg = message.message;
+    if (!msg) return null;
+
+    // Plain text conversation
+    if (msg.conversation) return msg.conversation;
+    
+    // Extended text message
+    if (msg.extendedTextMessage?.text) return msg.extendedTextMessage.text;
+    
+    // Media with caption
+    if (msg.imageMessage?.caption) return msg.imageMessage.caption;
+    if (msg.videoMessage?.caption) return msg.videoMessage.caption;
+    if (msg.documentMessage?.caption) return msg.documentMessage.caption;
+    
+    return null;
   }
 }
 
