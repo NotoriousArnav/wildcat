@@ -76,11 +76,11 @@ function createManagementRoutes(accountManager, socketManager, app) {
   router.delete('/accounts/:accountId', async (req, res) => {
     const { accountId } = req.params;
     try {
+      // Delete account data first (needs socket info)
+      await socketManager.deleteAccountData(accountId);
+      
       // Disconnect socket if active
       await socketManager.removeSocket(accountId);
-      
-      // Delete account data
-      await socketManager.deleteAccountData(accountId);
       
       // Delete account record
       const collectionName = await accountManager.deleteAccount(accountId);
