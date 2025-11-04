@@ -82,11 +82,28 @@ async function main() {
   // Start server
   await startServer(app);
 
-  console.log("Multi-account API is ready!");
-  console.log("- Create accounts: POST /accounts");
-  console.log("- List accounts: GET /accounts");
-  console.log("- Account endpoints: /accounts/:accountId/...");
-}
+   console.log("Multi-account API is ready!");
+   console.log("- Create accounts: POST /accounts");
+   console.log("- List accounts: GET /accounts");
+   console.log("- Account endpoints: /accounts/:accountId/...");
+
+   // Send admin notification if configured
+   if (process.env.ADMIN_NUMBER && process.env.ADMIN_ACCOUNT) {
+     const adminSocket = socketManager.getSocket(process.env.ADMIN_ACCOUNT);
+     if (adminSocket && adminSocket.status === 'connected') {
+       try {
+         await adminSocket.socket.sendMessage(process.env.ADMIN_NUMBER, { 
+           text: '🤖 Wildcat bot is now online and ready to assist!' 
+         });
+         console.log('✅ Admin startup notification sent');
+       } catch (err) {
+         console.error('❌ Failed to send admin startup notification:', err.message);
+       }
+     } else {
+       console.log('ℹ️ Admin account not connected, skipping startup notification');
+     }
+   }
+ }
 
 main().catch((err) => {
   console.error("Fatal error during startup:", err);
