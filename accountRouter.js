@@ -58,30 +58,47 @@ function createAccountRouter(accountId, socketManager) {
       
       // Add quoted message if provided
       if (quotedMessageId) {
-        const messagesCollection = db.collection('messages');
-        const quotedMsg = await messagesCollection.findOne({ 
-          messageId: quotedMessageId,
-          accountId 
-        });
-        
-        if (quotedMsg) {
-          messageContent.quoted = {
-            key: {
-              remoteJid: quotedMsg.chatId,
-              id: quotedMsg.messageId,
-              fromMe: quotedMsg.fromMe
+        try {
+          // Try to get the message from WhatsApp socket store
+          const quotedMsgFromStore = await socketInfo.socket.loadMessage(to, quotedMessageId);
+          
+          if (quotedMsgFromStore) {
+            messageContent.quoted = quotedMsgFromStore;
+          } else {
+            // Fallback: construct from DB
+            const messagesCollection = db.collection('messages');
+            const quotedMsg = await messagesCollection.findOne({ 
+              messageId: quotedMessageId,
+              accountId 
+            });
+            
+            if (quotedMsg) {
+              // Construct a proper quoted message object
+              messageContent.quoted = {
+                key: {
+                  remoteJid: quotedMsg.chatId,
+                  id: quotedMsg.messageId,
+                  fromMe: quotedMsg.fromMe,
+                  participant: quotedMsg.fromMe ? undefined : quotedMsg.from
+                },
+                message: {
+                  conversation: quotedMsg.text || ''
+                }
+              };
+            } else {
+              // Last fallback: try with fromMe=true
+              messageContent.quoted = {
+                key: {
+                  remoteJid: to,
+                  id: quotedMessageId,
+                  fromMe: true
+                }
+              };
             }
-          };
-        } else {
-          // Fallback: message not in DB (likely outgoing message we sent)
-          // Try with fromMe=true
-          messageContent.quoted = {
-            key: {
-              remoteJid: to,
-              id: quotedMessageId,
-              fromMe: true
-            }
-          };
+          }
+        } catch (quoteErr) {
+          console.error(`Error loading quoted message ${quotedMessageId}:`, quoteErr.message);
+          // Continue without quote if it fails
         }
       }
       
@@ -132,29 +149,47 @@ function createAccountRouter(accountId, socketManager) {
       
       // Add quoted message if provided
       if (quotedMessageId) {
-        const messagesCollection = db.collection('messages');
-        const quotedMsg = await messagesCollection.findOne({ 
-          messageId: quotedMessageId,
-          accountId 
-        });
-        
-        if (quotedMsg) {
-          messageContent.quoted = {
-            key: {
-              remoteJid: quotedMsg.chatId,
-              id: quotedMsg.messageId,
-              fromMe: quotedMsg.fromMe
+        try {
+          // Try to get the message from WhatsApp socket store
+          const quotedMsgFromStore = await socketInfo.socket.loadMessage(to, quotedMessageId);
+          
+          if (quotedMsgFromStore) {
+            messageContent.quoted = quotedMsgFromStore;
+          } else {
+            // Fallback: construct from DB
+            const messagesCollection = db.collection('messages');
+            const quotedMsg = await messagesCollection.findOne({ 
+              messageId: quotedMessageId,
+              accountId 
+            });
+            
+            if (quotedMsg) {
+              // Construct a proper quoted message object
+              messageContent.quoted = {
+                key: {
+                  remoteJid: quotedMsg.chatId,
+                  id: quotedMsg.messageId,
+                  fromMe: quotedMsg.fromMe,
+                  participant: quotedMsg.fromMe ? undefined : quotedMsg.from
+                },
+                message: {
+                  conversation: quotedMsg.text || ''
+                }
+              };
+            } else {
+              // Last fallback: try with fromMe=true
+              messageContent.quoted = {
+                key: {
+                  remoteJid: to,
+                  id: quotedMessageId,
+                  fromMe: true
+                }
+              };
             }
-          };
-        } else {
-          // Fallback: message not in DB (likely outgoing message we sent)
-          messageContent.quoted = {
-            key: {
-              remoteJid: to,
-              id: quotedMessageId,
-              fromMe: true
-            }
-          };
+          }
+        } catch (quoteErr) {
+          console.error(`Error loading quoted message ${quotedMessageId}:`, quoteErr.message);
+          // Continue without quote if it fails
         }
       }
       
