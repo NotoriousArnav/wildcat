@@ -88,19 +88,25 @@ async function main() {
    console.log("- Account endpoints: /accounts/:accountId/...");
 
    // Send admin notification if configured
-   if (process.env.ADMIN_NUMBER && process.env.ADMIN_ACCOUNT) {
-     const adminSocket = socketManager.getSocket(process.env.ADMIN_ACCOUNT);
-     if (adminSocket && adminSocket.status === 'connected') {
-       try {
-         await adminSocket.socket.sendMessage(process.env.ADMIN_NUMBER, { 
-           text: '🤖 Wildcat bot is now online and ready to assist!' 
-         });
-         console.log('✅ Admin startup notification sent');
-       } catch (err) {
-         console.error('❌ Failed to send admin startup notification:', err.message);
+   if (process.env.ADMIN_NUMBER) {
+     const allSockets = socketManager.getAllSockets();
+     const connectedSockets = allSockets.filter(s => s.status === 'connected');
+     
+     if (connectedSockets.length > 0) {
+       console.log(`📤 Sending startup notifications to admin from ${connectedSockets.length} connected account(s)...`);
+       
+       for (const socketInfo of connectedSockets) {
+         try {
+           await socketInfo.socket.sendMessage(process.env.ADMIN_NUMBER, { 
+             text: `🤖 Wildcat bot (${socketInfo.id}) is now online and ready to assist!` 
+           });
+           console.log(`✅ Startup notification sent from ${socketInfo.id}`);
+         } catch (err) {
+           console.error(`❌ Failed to send from ${socketInfo.id}:`, err.message);
+         }
        }
      } else {
-       console.log('ℹ️ Admin account not connected, skipping startup notification');
+       console.log('ℹ️ No connected accounts found, skipping admin notifications');
      }
    }
  }
