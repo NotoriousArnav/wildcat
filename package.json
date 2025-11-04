@@ -1,10 +1,27 @@
 {
   "name": "wildcat",
   "version": "2.0.0",
-  "description": "Multi-Account WhatsApp Integration Layer for Data Connectivity and Transfer",
+  "description": "WhatsApp Integration Layer for Data Connectivity and Transfer",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "ping": "node scripts/cli.js ping",
+    "accounts": "node scripts/cli.js accounts",
+    "accounts:list": "node scripts/cli.js accounts:list",
+    "account:status": "node scripts/cli.js account:status",
+    "account:create": "node scripts/cli.js account:create",
+    "account:delete": "node scripts/cli.js account:delete",
+    "account:connect": "node scripts/cli.js account:connect",
+    "account:disconnect": "node scripts/cli.js account:disconnect",
+    "message:send": "node scripts/cli.js message:send",
+    "messages": "node scripts/cli.js messages",
+    "messages:all": "node scripts/cli.js messages:all",
+    "webhook:add": "node scripts/cli.js webhook:add",
+    "logs:app": "node scripts/cli.js logs:app",
+    "logs:http": "node scripts/cli.js logs:http",
+    "logs:baileys": "node scripts/cli.js logs:baileys",
+    "cli": "node scripts/cli.js"
   },
   "repository": {
     "type": "git",

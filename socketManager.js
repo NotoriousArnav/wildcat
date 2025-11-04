@@ -44,7 +44,9 @@ class SocketManager {
     // Handle connection updates
     sock.ev.on("connection.update", async (update) => {
       const { connection, lastDisconnect, qr } = update || {};
-      socketInfo.status = connection || 'unknown';
+      if (connection) {
+        socketInfo.status = connection;
+      }
       socketInfo.lastDisconnect = lastDisconnect;
       socketInfo.qr = qr;
 
@@ -85,9 +87,11 @@ class SocketManager {
             accountId,
             id: msg.key.id,
             from: msg.key.remoteJid,
+            to: msg.key.remoteJid, // The JID this message is associated with
             message: msg.message,
             timestamp: msg.messageTimestamp,
             fromMe: msg.key.fromMe,
+            createdAt: new Date(),
           });
         });
 
@@ -99,8 +103,10 @@ class SocketManager {
               accountId,
               id: msg.key.id,
               from: msg.key.remoteJid,
+              to: msg.key.remoteJid, // The JID this message is associated with
               message: msg.message,
               timestamp: msg.messageTimestamp,
+              fromMe: msg.key.fromMe,
             };
             const webhooksCollection = this.db.collection("webhooks");
             const webhooks = await webhooksCollection.find({}).toArray();

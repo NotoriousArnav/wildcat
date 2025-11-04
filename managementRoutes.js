@@ -138,6 +138,45 @@ function createManagementRoutes(accountManager, socketManager, app) {
     }
   });
 
+  // Global message history (all accounts)
+  router.get('/messages', async (req, res) => {
+    try {
+      const { connectToDB } = require('./db');
+      const db = await connectToDB();
+      const collection = db.collection('messages');
+      
+      // Support pagination
+      const limit = Math.min(parseInt(req.query.limit) || 50, 500);
+      const skip = parseInt(req.query.skip) || 0;
+      const accountId = req.query.accountId; // Optional filter by account
+      
+      const query = accountId ? { accountId } : {};
+      
+      const messages = await collection
+        .find(query)
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+      
+      const total = await collection.countDocuments(query);
+      
+      return res.status(200).json({ 
+        ok: true, 
+        messages,
+        pagination: {
+          skip,
+          limit,
+          total,
+          hasMore: skip + messages.length < total
+        }
+      });
+    } catch (err) {
+      console.error('GET /messages error:', err);
+      return res.status(500).json({ ok: false, error: 'internal_error' });
+    }
+  });
+
   return router;
 }
 
