@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { connectToDB } = require('./db');
-const MediaHandler = require('./mediaHandler');
+const MediaHandler = require('./mediaHandler.new.js');
 const audioConverter = require('./audioConverter');
 
 // Configure multer for memory storage

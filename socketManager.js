@@ -4,7 +4,7 @@ const useMongoDBAuthState = require("./mongoAuthState");
 const qrcode = require("qrcode-terminal");
 const { connectToDB } = require("./db");
 const { wireSocketLogging } = require("./logger");
-const MediaHandler = require("./mediaHandler");
+const MediaHandler = require("./mediaHandler.new.js");
 
 class SocketManager {
   constructor() {

@@ -18,6 +18,23 @@ Wildcat now supports **multiple WhatsApp accounts** simultaneously. Each account
 - Has its own WhatsApp socket connection
 - Has dedicated API endpoints under `/accounts/:accountId/`
 
+### Media Storage Backends
+
+Wildcat supports pluggable media storage backends for flexibility in deployment:
+
+- **GridFS (default)**: Stores media files in MongoDB GridFS. Suitable for small to medium deployments.
+- **Cloudinary**: Offloads media to Cloudinary CDN for better performance and scalability.
+
+Configure via `MEDIA_STORAGE` environment variable:
+- `MEDIA_STORAGE=gridfs` (default)
+- `MEDIA_STORAGE=cloudinary`
+
+For Cloudinary, set these environment variables:
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- `CLOUDINARY_FOLDER` (optional, defaults to 'whatsapp')
+
 ---
 
 ## Management Endpoints
@@ -676,7 +693,7 @@ curl -X POST http://localhost:3000/webhooks \
 - ✅ Media message support (images, videos, audio, documents)
 - ✅ Message replies/quotes and mentions
 - ✅ Message reactions
-- ✅ Full chat history storage with GridFS
+- ✅ Pluggable media storage (GridFS or Cloudinary)
 - ✅ Media retrieval endpoints for CRM integration
 - ✅ Message retrieval and pagination
 - 🔄 Group management endpoints
