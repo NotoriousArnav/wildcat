@@ -269,6 +269,14 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/send/image \
   - `audio` (file, required): Audio file to send
   - `to` (text, required): WhatsApp JID
   - `ptt` (boolean, optional): Send as voice message/PTT (default: false)
+- **Important:** For best compatibility across all devices, audio should be encoded as:
+  - **Format:** OGG with Opus codec (`libopus`)
+  - **Channels:** Mono (1 channel)
+  - **Example ffmpeg command:**
+    ```bash
+    ffmpeg -i input.mp3 -avoid_negative_ts make_zero -ac 1 -codec:a libopus output.ogg
+    ```
+  - Other formats like MP3/M4A may work but compatibility varies
 - **Response 200:**
 ```json
 {
@@ -301,6 +309,7 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/send/image \
 - **Method:** `POST`
 - **Path:** `/accounts/:accountId/message/react`
 - **Description:** Send a reaction emoji to a message. Send empty emoji to remove reaction.
+- **Important:** The message must exist in the database for the reaction to work. Only react to messages that have been received/stored via webhook events.
 - **Request Body:**
 ```json
 {
@@ -311,13 +320,20 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/send/image \
 ```
 - **Parameters:**
   - `chatId` (required): WhatsApp JID of the chat
-  - `messageId` (required): ID of message to react to
+  - `messageId` (required): ID of message to react to (must be stored in database)
   - `emoji` (optional): Emoji to react with (empty string removes reaction)
 - **Response 200:**
 ```json
 {
   "ok": true,
   "messageId": "3EB0B98765432109"
+}
+```
+- **Response 404:**
+```json
+{
+  "ok": false,
+  "error": "Message not found in database"
 }
 ```
 

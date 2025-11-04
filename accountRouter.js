@@ -278,12 +278,28 @@ function createAccountRouter(accountId, socketManager) {
     }
     
     try {
+      // Retrieve message from database to get complete key with fromMe field
+      const messagesCollection = db.collection('messages');
+      const originalMsg = await messagesCollection.findOne({ 
+        messageId,
+        chatId,
+        accountId 
+      });
+      
+      if (!originalMsg) {
+        return res.status(404).json({ 
+          ok: false, 
+          error: 'Message not found in database' 
+        });
+      }
+      
       const reactionMessage = {
         react: {
           text: emoji || '', // Empty string removes reaction
           key: {
             remoteJid: chatId,
-            id: messageId
+            id: messageId,
+            fromMe: originalMsg.fromMe
           }
         }
       };
