@@ -4,6 +4,7 @@
   "description": "WhatsApp Integration Layer for Data Connectivity and Transfer",
   "main": "index.js",
   "scripts": {
+    "countLines":"cat ./*.js | wc -l",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "ping": "node scripts/cli.js ping",
