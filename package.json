@@ -12,6 +12,7 @@
     "accounts:list": "node scripts/cli.js accounts:list",
     "account:status": "node scripts/cli.js account:status",
     "account:create": "node scripts/cli.js account:create",
+    "account:create:qr": "node scripts/cli.js account:create:qr",
     "account:delete": "node scripts/cli.js account:delete",
     "account:connect": "node scripts/cli.js account:connect",
     "account:disconnect": "node scripts/cli.js account:disconnect",

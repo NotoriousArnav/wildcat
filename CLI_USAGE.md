@@ -49,6 +49,14 @@ npm run account:create myaccount
 npm run account:create myaccount "My Business Account"
 ```
 
+#### Create a new account and show QR
+```bash
+npm run account:create:qr <accountId> [name]
+```
+Notes:
+- Requires `jq`. If `qrencode` is installed, it renders a high-quality terminal QR; otherwise it falls back to the bundled `qrcode-terminal` package.
+- It will create (idempotent), start connection, then poll for up to 60 seconds for a QR and display it when ready.
+
 #### Delete an account
 ```bash
 npm run account:delete <accountId>

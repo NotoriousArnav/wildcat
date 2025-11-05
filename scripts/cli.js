@@ -37,6 +37,39 @@ const commands = {
     return `curl -s -X POST ${BASE_URL}/accounts/${accountId}/disconnect | jq '.'`;
   },
   
+  // Create an account and show QR in terminal
+  'account:create:qr': (accountId, accountName) => {
+    if (!accountId) throw new Error('Usage: npm run account:create:qr <accountId> [accountName]');
+    const name = accountName || accountId;
+    // Bash script: create, connect, poll for QR, render via qrencode or qrcode-terminal fallback
+    return `bash -lc '
+set -e
+BASE_URL="${BASE_URL}"
+ID="${accountId}"
+NAME="${name}"
+# Create account (idempotent)
+curl -s -X POST "$BASE_URL/accounts" -H "Content-Type: application/json" -d '{"id":"'"$ID"'","name":"'"$NAME"'"}' >/dev/null || true
+# Ensure connection is initiated
+curl -s -X POST "$BASE_URL/accounts/$ID/connect" >/dev/null || true
+>&2 echo "Waiting for QR for $ID (60s timeout)..."
+for i in $(seq 1 60); do
+  QR=$(curl -s "$BASE_URL/accounts/$ID/status" | jq -r '.qr // empty')
+  if [ -n "$QR" ]; then
+    if command -v qrencode >/dev/null 2>&1; then
+      echo "$QR" | qrencode -t ansiutf
+    else
+      node -e "require('qrcode-terminal').generate(process.argv[1], { small: true })" "$QR"
+    fi
+    >&2 echo "Scan this QR with WhatsApp to link account: $ID"
+    exit 0
+  fi
+  sleep 1
+done
+>&2 echo "Timed out waiting for QR for $ID"
+exit 1
+'`;
+  },
+  
   'message:send': (accountId, to, message) => {
     if (!accountId || !to || !message) {
       throw new Error('Usage: npm run message:send <accountId> <to> <message>');
@@ -69,6 +102,7 @@ if (!command || !commands[command]) {
   console.log('  npm run accounts:list                        - List all accounts (full)');
   console.log('  npm run account:status <accountId>           - Get account status');
   console.log('  npm run account:create <accountId> [name]    - Create new account');
+  console.log('  npm run account:create:qr <accountId> [name] - Create account and show QR');
   console.log('  npm run account:delete <accountId>           - Delete account');
   console.log('  npm run account:connect <accountId>          - Connect account');
   console.log('  npm run account:disconnect <accountId>       - Disconnect account');
