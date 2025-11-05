@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+      - multi-acc-try
+      - feature/**
+      - fix/**
+      - chore/**
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Basic validation
+        run: |
+          node -v
+          npm -v
+          node -e "require('./package.json'); console.log('package.json ok')"
+
+      - name: Lint placeholder
+        run: echo "No linter configured yet"
