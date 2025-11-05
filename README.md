@@ -102,6 +102,29 @@ Environment variables:
 
 Health check: `GET /ping`
 
+## 🔀 n8n Integration (Example)
+
+The screenshot below demonstrates integrating Wildcat with n8n to receive webhooks and send WhatsApp messages via the REST API.
+
+![n8n Workflow](./TEST_n8n_Workflow.jpeg)
+
+Basic flow:
+- Receive inbound message via Wildcat webhook at your n8n HTTP Trigger node.
+- Transform or route the payload in n8n.
+- Send an outbound WhatsApp message using an HTTP Request node:
+  - Method: `POST`
+  - URL: `http://<wildcat-host>:3000/accounts/<accountId>/message/send`
+  - Body (JSON): `{ "to": "1234567890@s.whatsapp.net", "message": "Hello from n8n!" }`
+
+Register the webhook URL in Wildcat:
+```bash
+curl -X POST http://<wildcat-host>:3000/webhooks \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://your-n8n-host/webhook/<id>"}'
+```
+
+For more examples, see `docs/API_Reference.md`.
+
 ## 🤝 Contributing
 
 See [Development Guide](./docs/DEVELOPMENT.md) for contribution guidelines.
