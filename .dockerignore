@@ -1,0 +1,8 @@
+# See https://docs.docker.com/engine/reference/builder/
+node_modules
+.npm
+.git
+.gitignore
+.env
+Dockerfile
+.dockerignore
