@@ -33,9 +33,26 @@ async function restoreAccounts(accountManager, socketManager, app) {
       app.use(`/accounts/${accountId}`, accountRouter);
       console.log(`  ✓ Routes mounted for ${accountId}`);
       
-      // Auto-connect accounts that were previously connected
-      // Skip if status is 'created' (never connected)
-      if (account.status && account.status !== 'created') {
+      // Auto-connect policy:
+      // - If AUTO_CONNECT_ON_START=true, connect all accounts
+      // - Else connect if account was previously connected OR creds exist in auth collection
+      const autoConnectAll = process.env.AUTO_CONNECT_ON_START === 'true';
+      let shouldAutoConnect = false;
+      if (autoConnectAll) {
+        shouldAutoConnect = true;
+      } else if (account.status && account.status !== 'created') {
+        shouldAutoConnect = true;
+      } else {
+        try {
+          const collName = account.collectionName || `auth_${accountId}`;
+          const credsDoc = await socketManager.db.collection(collName).findOne({ _id: 'creds' });
+          shouldAutoConnect = !!credsDoc;
+        } catch (probeErr) {
+          // ignore and leave shouldAutoConnect as false
+        }
+      }
+
+      if (shouldAutoConnect) {
         console.log(`  → Auto-connecting ${accountId}...`);
         try {
           await socketManager.createSocket(accountId, account.collectionName);
@@ -46,7 +63,7 @@ async function restoreAccounts(accountManager, socketManager, app) {
           await accountManager.updateAccountStatus(accountId, 'not_started');
         }
       } else {
-        console.log(`  ⊘ Skipping auto-connect for ${accountId} (never connected)`);
+        console.log(`  ⊘ Skipping auto-connect for ${accountId} (no prior creds; POST /accounts/${accountId}/connect to start)`);
       }
     }
     

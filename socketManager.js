@@ -53,6 +53,8 @@ class SocketManager {
       socketInfo.lastDisconnect = lastDisconnect;
       socketInfo.qr = qr;
 
+      const accountsCol = this.db.collection('accounts');
+
       if (qr) {
         console.log(`\n=== QR Code for account: ${accountId} ===`);
         qrcode.generate(qr, { small: true });
@@ -60,22 +62,27 @@ class SocketManager {
       }
 
       if (connection === "close") {
-        const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-        if (shouldReconnect) {
+        const loggedOut = lastDisconnect?.error?.output?.statusCode === DisconnectReason.loggedOut;
+        if (!loggedOut) {
           // Remove old socket and reconnect
           this.sockets.delete(accountId);
           console.log(`Reconnecting account ${accountId} in 5 seconds...`);
+          try { await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'reconnecting', updatedAt: new Date() } }); } catch (_) {}
           setTimeout(() => this.createSocket(accountId, collName), 5000);
         } else {
           socketInfo.status = 'logged_out';
           console.log(`Account ${accountId} logged out.`);
+          try { await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'logged_out', updatedAt: new Date() } }); } catch (_) {}
         }
       } else if (connection === 'open') {
         socketInfo.status = 'connected';
         console.log(`Account ${accountId} connected successfully!`);
+        try { await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'connected', updatedAt: new Date() } }); } catch (_) {}
         if (process.env.ADMIN_NUMBER) {
           await sock.sendMessage(process.env.ADMIN_NUMBER, { text: `✅ Account ${accountId} connected successfully!` });
         }
+      } else if (connection === 'connecting') {
+        try { await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'connecting', updatedAt: new Date() } }); } catch (_) {}
       }
     });
 
