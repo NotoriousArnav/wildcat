@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+reviews:
+  profile: "assertive"
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  review_status: true
+  collapse_walkthrough: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+    # Limit to main branches; adjust as needed
+    base_branches: ["main", "master", "multi-acc-try", "feature/*", "fix/*", "chore/*"]
+  path_instructions:
+    # Focus on our JS server and scripts
+    - path: "**/*.{js,jsx,ts,tsx}"
+      instructions: |
+        Review Node.js/Express and Baileys integration code. Ensure:
+        - CommonJS style is preserved (no ESM imports unless repo migrated)
+        - Route handlers validate/sanitize inputs; return { ok: boolean, ... }
+        - MongoDB connections are reused; avoid per-request connections
+        - Logging uses logger.js helpers and avoids leaking secrets
+        - Socket lifecycle in index.js is not inadvertently altered
+        - Align env vars with README and .env.example
+    - path: "routes.js"
+      instructions: |
+        Confirm routes array structure { method, path, handler } and usage of req.app.locals.whatsapp_socket. Keep endpoints small and testable.
+    - path: "**/*.md"
+      instructions: |
+        Check docs for accuracy with implemented routes and environment variables. Keep README and docs in sync with changes.
+ignore:
+  # Ignore large or generated files that create noise
+  - "node_modules/**"
+  - "**/*.lock"
+  - "**/*.min.*"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.logs/**"
+  - "**/*.png"
+  - "**/*.jpg"
+  - "**/*.jpeg"
+  - "**/*.gif"
+
+# Optionally run linters/tools CodeRabbit can use
+# tools:
+#   eslint:
+#     enabled: true

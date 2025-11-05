@@ -68,3 +68,10 @@ GPL-3.0-only — See `LICENSE`
 ---
 
 **Repository:** https://github.com/NotoriousArnav/wildcat
+
+## 🤖 CodeRabbit Setup
+
+- Install the CodeRabbit GitHub App and grant access to this repo
+- Ensure this config file exists: `.coderabbit.yml` at repo root
+- Open a PR; CodeRabbit will auto-review and comment
+- Optional: Require the CodeRabbit status check in branch protection
