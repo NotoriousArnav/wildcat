@@ -12,7 +12,7 @@ reviews:
     enabled: true
     drafts: false
     # Limit to main branches; adjust as needed
-    base_branches: ["main", "master", "multi-acc-try", "feature/*", "fix/*", "chore/*"]
+    base_branches: ["main", "master", "multi-acc-try", "^feature\\/.*$", "^fix\\/.*$", "^chore\\/.*$"]
   path_instructions:
     # Focus on our JS server and scripts
     - path: "**/*.{js,jsx,ts,tsx}"
