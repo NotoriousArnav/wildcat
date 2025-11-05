@@ -5,10 +5,10 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Install ffmpeg and deps
-RUN apt-get update 
- && apt-get install -y --no-install-recommends 
-    ffmpeg 
-    ca-certificates 
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 # Only copy package files for clean install
