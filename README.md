@@ -12,7 +12,7 @@
 - 🚀 **Multi-Account Support** - Manage multiple WhatsApp numbers simultaneously
 - 📱 **Full WhatsApp Features** - Send/receive messages, media, reactions, and more
 - 🔗 **Webhook Integration** - Real-time message delivery to external services
-- 🗄️ **Media Storage** - Automatic GridFS storage with direct access endpoints
+- 🧾 **Media Storage** - Automatic GridFS storage with direct access endpoints
 - 🤖 **Bot-Ready** - Perfect for chatbots, automation, and CRM integrations
 - ⚡ **REST API** - Clean HTTP interface for easy integration
 
@@ -49,13 +49,58 @@ curl -X POST http://localhost:3000/accounts \
 - **[Architecture](./docs/ARCHITECTURE.md)** - System design
 - **[Development](./docs/DEVELOPMENT.md)** - Contributing guide
 
-## 🛠️ CLI Tools
+## 🧰 CLI Tools
 
 ```bash
 npm run accounts     # List accounts
 npm run account:create mybot "Bot Account"
 npm run message:send mybot 1234567890@s.whatsapp.net "Hello!"
 ```
+
+## 🐳 Docker
+
+A minimal image is provided via the `Dockerfile` with ffmpeg installed for audio conversion.
+
+- Build the image:
+```bash
+docker build -t wildcat:latest .
+```
+
+- Run the container (connect to MongoDB and expose port 3000):
+```bash
+docker run --name wildcat \
+  -p 3000:3000 \
+  -e HOST=0.0.0.0 \
+  -e PORT=3000 \
+  -e MONGO_URL="mongodb://host.docker.internal:27017" \
+  -e DB_NAME=wildcat \
+  -e AUTO_CONNECT_ON_START=true \
+  wildcat:latest
+```
+
+- Using a Docker network with MongoDB:
+```bash
+# Example: run mongo separately
+docker network create wildcat-net || true
+docker run -d --name mongo --network wildcat-net -p 27017:27017 mongo:6
+
+# Run Wildcat on the same network
+docker run --name wildcat --network wildcat-net -p 3000:3000 \
+  -e MONGO_URL="mongodb://mongo:27017" \
+  -e DB_NAME=wildcat \
+  -e AUTO_CONNECT_ON_START=true \
+  wildcat:latest
+```
+
+Environment variables:
+- `HOST` (default `0.0.0.0`)
+- `PORT` (default `3000`)
+- `MONGO_URL` (e.g., `mongodb://mongo:27017`)
+- `DB_NAME` (e.g., `wildcat`)
+- `ADMIN_NUMBER` (optional: `jid@s.whatsapp.net` to receive a startup ping)
+- `AUTO_CONNECT_ON_START` (`true|false`) to auto-connect restored accounts
+
+Health check: `GET /ping`
 
 ## 🤝 Contributing
 
@@ -75,3 +120,4 @@ GPL-3.0-only — See `LICENSE`
 - Ensure this config file exists: `.coderabbit.yml` at repo root
 - Open a PR; CodeRabbit will auto-review and comment
 - Optional: Require the CodeRabbit status check in branch protection
+

@@ -34,6 +34,12 @@ This guide will help you get Wildcat up and running on your system.
 
    # Optional: Logging level
    LOG_LEVEL=info
+
+   # Optional: Admin number to receive startup ping
+   # ADMIN_NUMBER=1234567890@s.whatsapp.net
+
+   # Auto connect restored accounts
+   # AUTO_CONNECT_ON_START=true
    ```
 
 4. **Start MongoDB:**
@@ -83,6 +89,42 @@ curl -X POST http://localhost:3000/accounts/myaccount/message/send \
     "message": "Hello from Wildcat API!"
   }'
 ```
+
+## Docker Deployment
+
+A `Dockerfile` is provided to build a production image (includes `ffmpeg` for audio conversion).
+
+- Build the image:
+```bash
+docker build -t wildcat:latest .
+```
+
+- Run with local MongoDB (host network example):
+```bash
+docker run --name wildcat \
+  -p 3000:3000 \
+  -e HOST=0.0.0.0 \
+  -e PORT=3000 \
+  -e MONGO_URL="mongodb://host.docker.internal:27017" \
+  -e DB_NAME=wildcat \
+  -e AUTO_CONNECT_ON_START=true \
+  wildcat:latest
+```
+
+- Run with a MongoDB container on the same network:
+```bash
+docker network create wildcat-net || true
+
+docker run -d --name mongo --network wildcat-net -p 27017:27017 mongo:6
+
+docker run --name wildcat --network wildcat-net -p 3000:3000 \
+  -e MONGO_URL="mongodb://mongo:27017" \
+  -e DB_NAME=wildcat \
+  -e AUTO_CONNECT_ON_START=true \
+  wildcat:latest
+```
+
+Health check: `GET /ping` should return `{ ok: true, pong: true }`.
 
 ## Development Mode
 
