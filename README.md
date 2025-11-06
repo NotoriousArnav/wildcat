@@ -1,10 +1,12 @@
-# Wildcat — WhatsApp Business API Integration
+# WILDCAT
+
+**W**hatsApp **I**ntegration **L**ayer for **D**ata **C**onnectivity **A**nd **T**ransfer
 
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/NotoriousArnav/wildcat?utm_source=oss&utm_medium=github&utm_campaign=NotoriousArnav%2Fwildcat&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 
 > **Unofficial WhatsApp integration** using reverse-engineered libraries. Use at your own risk and ensure compliance with WhatsApp's terms of service.
 
-**Wildcat** is a Node.js API server that provides REST endpoints for WhatsApp messaging, media handling, and webhook delivery. Built with Baileys and MongoDB for reliable multi-account support.
+**WILDCAT** is a Node.js API server that provides REST endpoints for WhatsApp messaging, media handling, and webhook delivery. Built with Baileys and MongoDB for reliable multi-account support.
 
 ## ✨ Why Wildcat?
 
@@ -125,9 +127,96 @@ curl -X POST http://<wildcat-host>:3000/webhooks \
 
 For more examples, see `docs/API_Reference.md`.
 
+## ⚠️ Important: Upcoming Breaking Changes
+
+**WILDCAT is undergoing major improvements.** The codebase is being modernized to improve maintainability, security, and developer experience. **Expect breaking changes** in upcoming releases.
+
+### Current Limitations & Security Warnings
+
+**🚨 CRITICAL: No Authentication**
+- Currently, **anyone** with access to your server can send WhatsApp messages
+- **DO NOT expose this API to the public internet** without a reverse proxy with authentication
+- This is a **major security risk** and will be addressed in v3.0
+
+**Current Issues:**
+- No API authentication (open access)
+- No rate limiting (spam risk)
+- SSRF vulnerability in webhook handler
+- Minimal input validation
+- CommonJS only (limits modern library usage)
+- 99 console.log statements instead of proper logging
+
+### 🚧 Roadmap: v3.0 (Breaking Changes Expected)
+
+**Phase 1: Code Quality & Migration (Current Focus)**
+- Migrate to ES Modules (ESM)
+- Migrate to TypeScript for type safety
+- Replace console.log with structured logging
+- Add JSDoc/TypeScript types for all APIs
+- Code cleanup and refactoring
+
+**Phase 2: Security (HIGH PRIORITY)**
+- Basic HTTP authentication (username/password from env)
+- API key authentication
+- JWT-based authentication
+- Rate limiting per account/IP
+- Webhook URL validation (prevent SSRF)
+- Input validation with Zod/Joi schemas
+
+**Phase 3: Features**
+- Contact and group name enrichment in webhooks
+- Better error messages and logging
+- Improved Docker deployment
+- Health check improvements
+- Metrics and monitoring endpoints
+
+**Phase 4: Production Readiness**
+- Automated testing (Jest)
+- CI/CD pipeline
+- Security audit
+- Performance optimization
+- Documentation updates
+
+### Migration Guide (Coming Soon)
+
+When v3.0 is released, you will need to:
+- Update environment variables (add authentication credentials)
+- Update API calls to include authentication headers
+- Review breaking changes in webhook payload structure
+- Update Docker configuration if using containers
+
+**Stay updated:** Watch this repository for release announcements.
+
+### Why These Changes?
+
+**Current state:** WILDCAT works but is not production-ready due to security gaps and maintainability concerns.
+
+**Goal:** Make WILDCAT:
+- ✅ **Secure** - Safe to deploy without exposing your WhatsApp accounts
+- ✅ **Modern** - ESM + TypeScript for better DX
+- ✅ **Reliable** - Proper testing and error handling
+- ✅ **Maintainable** - Clean code that's easy to contribute to
+
+### For Current Users
+
+**Recommendation:**
+- Use WILDCAT in **development/staging only** until v3.0
+- Deploy behind a reverse proxy with authentication (nginx, Caddy)
+- Monitor logs for suspicious activity
+- Keep backups of your MongoDB data
+- Star/watch this repo for updates
+
+**Timeline:** v3.0 expected in Q2 2025 (tentative)
+
 ## 🤝 Contributing
 
 See [Development Guide](./docs/DEVELOPMENT.md) for contribution guidelines.
+
+**Want to help with v3.0?** Priority areas:
+- Security improvements (authentication, rate limiting)
+- TypeScript migration
+- Test coverage
+- Documentation
 
 ## 🙏 Acknowledgments
 
