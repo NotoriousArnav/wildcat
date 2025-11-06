@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-bookworm-slim AS base
+FROM node:20.19.5-trixie-slim AS base
 ENV NODE_ENV=production
 WORKDIR /app
 
