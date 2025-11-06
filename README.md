@@ -129,9 +129,19 @@ For more examples, see `docs/API_Reference.md`.
 
 See [Development Guide](./docs/DEVELOPMENT.md) for contribution guidelines.
 
+## 🙏 Acknowledgments
+
+This project builds upon the work of many open-source contributors. See [ACKNOWLEDGMENTS.md](./ACKNOWLEDGMENTS.md) for a complete list of third-party projects and libraries used, including:
+
+- **@whiskeysockets/baileys** - WhatsApp Web API implementation
+- **mongo-baileys** - MongoDB session persistence (adapted code in `mongoAuthState.js`)
+- **Express**, **MongoDB**, and many other excellent npm packages
+
 ## 📄 License
 
 GPL-3.0-only — See `LICENSE`
+
+This project includes adapted code from MIT-licensed dependencies, which is compatible with GPL-3.0. All original copyright notices and attributions are preserved in the respective files and documented in `ACKNOWLEDGMENTS.md`.
 
 ---
 
