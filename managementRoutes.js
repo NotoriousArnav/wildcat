@@ -108,7 +108,8 @@ function createManagementRoutes(accountManager, socketManager, app) {
       const now = new Date();
       const result = await collection.updateOne({ url }, { $setOnInsert: { url, createdAt: now } }, { upsert: true });
       const created = result && (result.upsertedId != null || result.upsertedCount === 1);
-      log.info('webhook_registered', { url, created });
+      const redactedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}`;
+      log.info('webhook_registered', { url: redactedUrl, created });
       return res.status(created ? 201 : 200).json({ ok: true, url, created });
     } catch (err) {
       log.error('webhook_register_error', { error: err.message });

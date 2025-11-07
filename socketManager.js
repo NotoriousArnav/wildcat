@@ -82,9 +82,13 @@ class SocketManager {
           await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'connected', updatedAt: new Date() } });
         } catch (_) {}
         if (process.env.ADMIN_NUMBER) {
-          await sock.sendMessage(process.env.ADMIN_NUMBER, { text: `\u2705 Account ${accountId} connected successfully!` });
+          try {
+            await sock.sendMessage(process.env.ADMIN_NUMBER, { text: `\u2705 Account ${accountId} connected successfully!` });
+          } catch (notifyErr) {
+            socketLog.error('admin_notify_failed', { accountId, error: notifyErr.message });
+          }
         }
-      } else if (connection === 'connecting') {
+       } else if (connection === 'connecting') {
         try {
           await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'connecting', updatedAt: new Date() } });
         } catch (_) {}
@@ -229,7 +233,7 @@ class SocketManager {
     if (msg.videoMessage?.caption) return msg.videoMessage.caption;
     if (msg.documentMessage?.caption) return msg.documentMessage.caption;
     return null;
-  }
-}
+        }
+
 
 module.exports = SocketManager;

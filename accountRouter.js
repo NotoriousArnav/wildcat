@@ -206,22 +206,8 @@ function createAccountRouter(accountId, socketManager) {
       const sendOptions = {};
       if (quotedMessageId) {
         try {
-          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
-          if (quotedMsg) {
-            sendOptions.quoted = quotedMsg;
-          } else {
-            const messagesCollection = db.collection('messages');
-            const dbMsg = await messagesCollection.findOne({ messageId: quotedMessageId, accountId });
-            if (dbMsg && dbMsg.rawMessage) {
-              sendOptions.quoted = dbMsg.rawMessage;
-            } else if (dbMsg) {
-              sendOptions.quoted = {
-                key: { remoteJid: dbMsg.chatId, id: dbMsg.messageId, fromMe: dbMsg.fromMe, participant: dbMsg.fromMe ? undefined : dbMsg.from },
-                message: { conversation: dbMsg.text || '' },
-                messageTimestamp: dbMsg.timestamp
-              };
-            }
-          }
+          const quotedMsg = await loadQuotedMessage(socketInfo, quotedMessageId, to);
+          if (quotedMsg) sendOptions.quoted = quotedMsg;
         } catch (quoteErr) {
           log.error('image_quote_load_error', { error: quoteErr.message });
         }
@@ -254,22 +240,8 @@ function createAccountRouter(accountId, socketManager) {
       const sendOptions = {};
       if (quotedMessageId) {
         try {
-          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
-          if (quotedMsg) {
-            sendOptions.quoted = quotedMsg;
-          } else {
-            const messagesCollection = db.collection('messages');
-            const dbMsg = await messagesCollection.findOne({ messageId: quotedMessageId, accountId });
-            if (dbMsg && dbMsg.rawMessage) {
-              sendOptions.quoted = dbMsg.rawMessage;
-            } else if (dbMsg) {
-              sendOptions.quoted = {
-                key: { remoteJid: dbMsg.chatId, id: dbMsg.messageId, fromMe: dbMsg.fromMe, participant: dbMsg.fromMe ? undefined : dbMsg.from },
-                message: { conversation: dbMsg.text || '' },
-                messageTimestamp: dbMsg.timestamp
-              };
-            }
-          }
+          const quotedMsg = await loadQuotedMessage(socketInfo, quotedMessageId, to);
+          if (quotedMsg) sendOptions.quoted = quotedMsg;
         } catch (quoteErr) {
           log.error('video_quote_load_error', { error: quoteErr.message });
         }
@@ -309,22 +281,8 @@ function createAccountRouter(accountId, socketManager) {
       const sendOptions = {};
       if (quotedMessageId) {
         try {
-          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
-          if (quotedMsg) {
-            sendOptions.quoted = quotedMsg;
-          } else {
-            const messagesCollection = db.collection('messages');
-            const dbMsg = await messagesCollection.findOne({ messageId: quotedMessageId, accountId });
-            if (dbMsg && dbMsg.rawMessage) {
-              sendOptions.quoted = dbMsg.rawMessage;
-            } else if (dbMsg) {
-              sendOptions.quoted = {
-                key: { remoteJid: dbMsg.chatId, id: dbMsg.messageId, fromMe: dbMsg.fromMe, participant: dbMsg.fromMe ? undefined : dbMsg.from },
-                message: { conversation: dbMsg.text || '' },
-                messageTimestamp: dbMsg.timestamp
-              };
-            }
-          }
+          const quotedMsg = await loadQuotedMessage(socketInfo, quotedMessageId, to);
+          if (quotedMsg) sendOptions.quoted = quotedMsg;
         } catch (quoteErr) {
           log.error('audio_quote_load_error', { error: quoteErr.message });
         }
@@ -352,22 +310,8 @@ function createAccountRouter(accountId, socketManager) {
       const sendOptions = {};
       if (quotedMessageId) {
         try {
-          const quotedMsg = await socketInfo.socket.loadMessage(to, quotedMessageId);
-          if (quotedMsg) {
-            sendOptions.quoted = quotedMsg;
-          } else {
-            const messagesCollection = db.collection('messages');
-            const dbMsg = await messagesCollection.findOne({ messageId: quotedMessageId, accountId });
-            if (dbMsg && dbMsg.rawMessage) {
-              sendOptions.quoted = dbMsg.rawMessage;
-            } else if (dbMsg) {
-              sendOptions.quoted = {
-                key: { remoteJid: dbMsg.chatId, id: dbMsg.messageId, fromMe: dbMsg.fromMe, participant: dbMsg.fromMe ? undefined : dbMsg.from },
-                message: { conversation: dbMsg.text || '' },
-                messageTimestamp: dbMsg.timestamp
-              };
-            }
-          }
+          const quotedMsg = await loadQuotedMessage(socketInfo, quotedMessageId, to);
+          if (quotedMsg) sendOptions.quoted = quotedMsg;
         } catch (quoteErr) {
           log.error('document_quote_load_error', { error: quoteErr.message });
         }
