@@ -12,6 +12,8 @@ const { appLogger } = require('./logger');
  * @param {object} socketManager - Service responsible for socket lifecycle and socket-related data access.
  * @param {import('express').Application} app - Express application instance used to mount per-account routers.
  * @returns {import('express').Router} Configured router with all management endpoints mounted.
+ */
+
 function createManagementRoutes(accountManager, socketManager, app) {
   const router = express.Router();
   const { createAccountRouter } = require('./accountRouter');

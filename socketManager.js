@@ -179,7 +179,12 @@ class SocketManager {
           for (const webhook of webhooks) {
             const result = await sendToWebhook(webhook.url, webhookPayload);
             if (!result.ok) {
-              socketLog.error('webhook_send_failed', { accountId, webhook: webhook.url, error: result.error });
+              let redactedUrl = '<redacted>';
+              try {
+                const parsed = new URL(webhook.url);
+                redactedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}`;
+              } catch (_) {}
+              socketLog.error('webhook_send_failed', { accountId, webhook: redactedUrl, error: result.error });
             }
           }
         } catch (err) {
