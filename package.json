@@ -4,7 +4,7 @@
   "description": "WhatsApp Integration Layer for Data Connectivity and Transfer",
   "main": "index.js",
   "scripts": {
-    "countLines":"cat ./*.js | wc -l",
+    "countLines": "cat ./*.js | wc -l",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "ping": "node scripts/cli.js ping",
@@ -43,6 +43,7 @@
     "axios": "^1.13.1",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "helmet": "^7.1.0",
     "link-preview-js": "^3.1.0",
     "mongo-baileys": "^1.0.1",
     "mongodb": "^6.20.0",

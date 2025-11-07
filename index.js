@@ -1,37 +1,48 @@
-require("dotenv").config();
+require('dotenv').config();
 
-const { constructApp, startServer } = require("./server");
-const SocketManager = require("./socketManager");
-const AccountManager = require("./accountManager");
-const { createManagementRoutes } = require("./managementRoutes");
-const { createAccountRouter } = require("./accountRouter");
+const { constructApp, startServer } = require('./server');
+const SocketManager = require('./socketManager');
+const AccountManager = require('./accountManager');
+const { createManagementRoutes } = require('./managementRoutes');
+const { createAccountRouter } = require('./accountRouter');
+const { appLogger } = require('./logger');
 
 /**
- * Restore existing accounts from database on startup
- * - Mounts routes for each account
- * - Optionally auto-connects accounts that were previously connected
+ * Restore accounts from persistent storage, mount per-account routes, and conditionally auto-connect sockets.
+ *
+ * For each discovered account this mounts an account-specific router at `/accounts/{accountId}`.
+ * It will attempt to auto-connect a socket for the account when one of the following is true:
+ * - the environment variable `AUTO_CONNECT_ON_START` is set to `'true'`;
+ * - the account has a stored `status` that is not `'created'`;
+ * - a credentials document (`_id: 'creds'`) exists in the account's auth collection.
+ * If socket creation fails for an account, the account status is updated to `'not_started'`.
+ *
+ * @param {*} accountManager - Manager exposing account listing and status update operations (e.g., `listAccounts()`, `updateAccountStatus()`).
+ * @param {*} socketManager - Manager responsible for socket lifecycle and DB access (e.g., `createSocket()`, `db`).
+ * @param {import('express').Application} app - Express application on which per-account routers will be mounted.
  */
 async function restoreAccounts(accountManager, socketManager, app) {
-  console.log("Restoring existing accounts from database...");
+  const log = appLogger('startup');
+  log.info('restoring_accounts');
   
   try {
     const accounts = await accountManager.listAccounts();
     
     if (accounts.length === 0) {
-      console.log("No existing accounts found.");
+      log.info('no_existing_accounts');
       return;
     }
     
-    console.log(`Found ${accounts.length} account(s) to restore.`);
+    log.info(`found_accounts_to_restore`, { count: accounts.length });
     
     for (const account of accounts) {
       const accountId = account._id;
-      console.log(`Restoring account: ${accountId} (status: ${account.status})`);
+      log.info('restoring_account', { accountId, status: account.status });
       
       // Mount routes for this account
       const accountRouter = createAccountRouter(accountId, socketManager);
       app.use(`/accounts/${accountId}`, accountRouter);
-      console.log(`  ✓ Routes mounted for ${accountId}`);
+      log.info('routes_mounted', { accountId });
       
       // Auto-connect policy:
       // - If AUTO_CONNECT_ON_START=true, connect all accounts
@@ -53,29 +64,38 @@ async function restoreAccounts(accountManager, socketManager, app) {
       }
 
       if (shouldAutoConnect) {
-        console.log(`  → Auto-connecting ${accountId}...`);
+        log.info('auto_connecting', { accountId });
         try {
           await socketManager.createSocket(accountId, account.collectionName);
-          console.log(`  ✓ Socket created for ${accountId}`);
+          log.info('socket_created', { accountId });
         } catch (err) {
-          console.error(`  ✗ Failed to auto-connect ${accountId}:`, err.message);
+          log.error('auto_connect_failed', { accountId, error: err.message });
           // Update status to indicate restoration failed
           await accountManager.updateAccountStatus(accountId, 'not_started');
         }
       } else {
-        console.log(`  ⊘ Skipping auto-connect for ${accountId} (no prior creds; POST /accounts/${accountId}/connect to start)`);
+        log.info('auto_connect_skipped', { accountId });
       }
     }
     
-    console.log("Account restoration complete!");
+    log.info('account_restoration_complete');
   } catch (err) {
-    console.error("Error during account restoration:", err);
+    const log = appLogger('startup');
+    log.error('account_restoration_error', { error: err.message });
     // Don't throw - allow server to start even if restoration fails
   }
 }
 
+/**
+ * Orchestrates application startup: initializes socket and account managers, constructs the Express app,
+ * mounts management routes, restores existing accounts, and starts the HTTP server.
+ *
+ * The function performs the necessary side effects for application readiness (route mounting, account restoration,
+ * and server start) and logs startup lifecycle events.
+ */
 async function main() {
-  console.log("Initializing multi-account WhatsApp API...");
+  const log = appLogger('startup');
+  log.info('initializing_api');
 
   // Initialize managers
   const socketManager = new SocketManager();
@@ -84,7 +104,7 @@ async function main() {
   await socketManager.init();
   await accountManager.init();
 
-  console.log("Managers initialized successfully!");
+  log.info('managers_initialized');
 
   // Create Express app
   const app = constructApp();
@@ -99,16 +119,21 @@ async function main() {
   // Start server
   await startServer(app);
 
-   console.log("Multi-account API is ready!");
-   console.log("- Create accounts: POST /accounts");
-   console.log("- List accounts: GET /accounts");
-   console.log("- Account endpoints: /accounts/:accountId/...");
+  log.info('api_ready');
+  log.info('endpoints_summary', {
+    accounts_create: 'POST /accounts',
+    accounts_list: 'GET /accounts',
+    account_prefix: '/accounts/:accountId/...'
+  });
 
-   // Send admin notification if configured
-   if (process.env.ADMIN_NUMBER) { console.log(`Admin number is ${process.env.ADMIN_NUMBER}`) }
+  // Do not log secrets; only note configuration presence
+  if (process.env.ADMIN_NUMBER) {
+    log.info('admin_number_configured');
+  }
 }
 
 main().catch((err) => {
-  console.error("Fatal error during startup:", err);
+  const log = appLogger('startup');
+  log.error('fatal_startup_error', { error: err.message });
   process.exit(1);
 });

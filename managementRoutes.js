@@ -1,256 +1,176 @@
 const express = require('express');
 const { GridFSBucket, ObjectId } = require('mongodb');
+const { appLogger } = require('./logger');
 
-// Global management routes
+/**
+ * Builds and returns an Express router exposing management endpoints for accounts, media, webhooks, messages, and health checks.
+ *
+ * The router includes routes to create, list, retrieve, and delete accounts (mounting per-account routers on creation),
+ * list and fetch media from GridFS, register webhooks, list messages with pagination, and a /ping health check.
+ *
+ * @param {object} accountManager - Service responsible for account lifecycle operations (create, list, get, delete).
+ * @param {object} socketManager - Service responsible for socket lifecycle and socket-related data access.
+ * @param {import('express').Application} app - Express application instance used to mount per-account routers.
+ * @returns {import('express').Router} Configured router with all management endpoints mounted.
+ */
+
 function createManagementRoutes(accountManager, socketManager, app) {
   const router = express.Router();
   const { createAccountRouter } = require('./accountRouter');
+  const log = appLogger('management');
 
-  // Create a new account
   router.post('/accounts', async (req, res) => {
     const { id, name, collectionName } = req.body || {};
-    if (!id) {
-      return res.status(400).json({ ok: false, error: 'id is required' });
-    }
-    
+    if (!id) return res.status(400).json({ ok: false, error: 'id is required' });
     try {
       const account = await accountManager.createAccount(id, name, collectionName);
-      
-      // Create and mount router for this account
       const accountRouter = createAccountRouter(id, socketManager);
       app.use(`/accounts/${id}`, accountRouter);
-      
-      // Optionally auto-start connection
       await socketManager.createSocket(id, account.collectionName);
-      
+      log.info('account_created', { accountId: id });
       return res.status(201).json({ ok: true, account });
     } catch (err) {
+      log.error('account_create_error', { error: err.message });
       return res.status(400).json({ ok: false, error: err.message });
     }
   });
 
-  // List all accounts
   router.get('/accounts', async (req, res) => {
     try {
       const accounts = await accountManager.listAccounts();
       const sockets = socketManager.getAllSockets();
       const statusMap = new Map(sockets.map(s => [s.id, { status: s.status, qr: s.qr }]));
-      
-      const result = accounts.map(acc => ({ 
-        ...acc, 
+      const result = accounts.map(acc => ({
+        ...acc,
         currentStatus: statusMap.get(acc._id)?.status || 'not_started',
         hasQR: !!statusMap.get(acc._id)?.qr
       }));
-      
       return res.status(200).json({ ok: true, accounts: result });
     } catch (err) {
-      console.error('Error listing accounts:', err);
+      log.error('accounts_list_error', { error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });
 
-  // Get specific account info
   router.get('/accounts/:accountId', async (req, res) => {
     const { accountId } = req.params;
     try {
       const account = await accountManager.getAccount(accountId);
-      if (!account) {
-        return res.status(404).json({ ok: false, error: 'Account not found' });
-      }
-      
+      if (!account) return res.status(404).json({ ok: false, error: 'Account not found' });
       const socketInfo = socketManager.getSocket(accountId);
-      return res.status(200).json({ 
-        ok: true, 
-        account: {
-          ...account,
-          currentStatus: socketInfo?.status || 'not_started',
-          hasQR: !!socketInfo?.qr
-        }
-      });
+      return res.status(200).json({ ok: true, account: { ...account, currentStatus: socketInfo?.status || 'not_started', hasQR: !!socketInfo?.qr } });
     } catch (err) {
+      log.error('account_get_error', { error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });
 
-  // Delete account
   router.delete('/accounts/:accountId', async (req, res) => {
     const { accountId } = req.params;
     try {
-      // Delete account data first (needs socket info)
       await socketManager.deleteAccountData(accountId);
-      
-      // Disconnect socket if active
       await socketManager.removeSocket(accountId);
-      
-      // Delete account record
       const collectionName = await accountManager.deleteAccount(accountId);
-      
-      // Ensure collection is dropped (fallback if socket wasn't connected)
       if (collectionName) {
         try {
           const { connectToDB } = require('./db');
           const db = await connectToDB();
           await db.collection(collectionName).drop();
-          console.log(`Dropped collection: ${collectionName}`);
-        } catch (dropErr) {
-          // Collection might not exist or already dropped - ignore
-          console.log(`Collection ${collectionName} may already be dropped or not exist`);
+          log.info('collection_dropped', { collectionName });
+        } catch (_) {
+          log.info('collection_drop_not_required', { collectionName });
         }
       }
-      
-      return res.status(200).json({ 
-        ok: true, 
-        message: 'Account deleted',
-        deletedCollection: collectionName
-      });
+      log.info('account_deleted', { accountId });
+      return res.status(200).json({ ok: true, message: 'Account deleted', deletedCollection: collectionName });
     } catch (err) {
-      console.error(`Error deleting account ${accountId}:`, err);
+      log.error('account_delete_error', { accountId, error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });
 
-  // Health check
   router.get('/ping', (req, res) => {
     res.status(200).json({ ok: true, pong: true, time: new Date().toISOString() });
   });
 
-  // Webhooks
   router.post('/webhooks', async (req, res) => {
     try {
       const { url } = req.body || {};
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ ok: false, error: 'url is required and must be a string' });
-      }
-      
+      if (!url || typeof url !== 'string') return res.status(400).json({ ok: false, error: 'url is required and must be a string' });
       let parsed;
       try {
         parsed = new URL(url);
       } catch (_) {
         return res.status(400).json({ ok: false, error: 'invalid URL' });
       }
-      
-      if (!/^https?:$/.test(parsed.protocol)) {
-        return res.status(400).json({ ok: false, error: 'only http/https URLs are allowed' });
-      }
-
+      if (!/^https?:$/.test(parsed.protocol)) return res.status(400).json({ ok: false, error: 'only http/https URLs are allowed' });
       const { connectToDB } = require('./db');
       const db = await connectToDB();
       const collection = db.collection('webhooks');
-
       const now = new Date();
-      const result = await collection.updateOne(
-        { url },
-        { $setOnInsert: { url, createdAt: now } },
-        { upsert: true }
-      );
-
+      const result = await collection.updateOne({ url }, { $setOnInsert: { url, createdAt: now } }, { upsert: true });
       const created = result && (result.upsertedId != null || result.upsertedCount === 1);
+      const redactedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}`;
+      log.info('webhook_registered', { url: redactedUrl, created });
       return res.status(created ? 201 : 200).json({ ok: true, url, created });
     } catch (err) {
-      console.error('POST /webhooks error:', err);
+      log.error('webhook_register_error', { error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });
 
-  // Global message history (all accounts)
   router.get('/messages', async (req, res) => {
     try {
       const { connectToDB } = require('./db');
       const db = await connectToDB();
       const collection = db.collection('messages');
-      
-      // Support pagination
       const limit = Math.min(parseInt(req.query.limit) || 50, 500);
       const skip = parseInt(req.query.skip) || 0;
-      const accountId = req.query.accountId; // Optional filter by account
-      
+      const accountId = req.query.accountId;
       const query = accountId ? { accountId } : {};
-      
-      const messages = await collection
-        .find(query)
-        .sort({ timestamp: -1 })
-        .skip(skip)
-        .limit(limit)
-        .toArray();
-      
+      const messages = await collection.find(query).sort({ timestamp: -1 }).skip(skip).limit(limit).toArray();
       const total = await collection.countDocuments(query);
-      
-      return res.status(200).json({ 
-        ok: true, 
-        messages,
-        pagination: {
-          skip,
-          limit,
-          total,
-          hasMore: skip + messages.length < total
-        }
-      });
+      return res.status(200).json({ ok: true, messages, pagination: { skip, limit, total, hasMore: skip + messages.length < total } });
     } catch (err) {
-      console.error('GET /messages error:', err);
+      log.error('messages_list_error', { error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });
 
-  // List all media files
   router.get('/media', async (req, res) => {
     try {
       const { connectToDB } = require('./db');
       const db = await connectToDB();
       const filesCollection = db.collection('media.files');
-      
-      // Build query from params
       const query = {};
-      if (req.query.messageId) {
-        query['metadata.messageId'] = req.query.messageId;
-      }
-      if (req.query.accountId) {
-        query['metadata.accountId'] = req.query.accountId;
-      }
-      if (req.query.chatId) {
-        query['metadata.chatId'] = req.query.chatId;
-      }
-      
+      if (req.query.messageId) query['metadata.messageId'] = req.query.messageId;
+      if (req.query.accountId) query['metadata.accountId'] = req.query.accountId;
+      if (req.query.chatId) query['metadata.chatId'] = req.query.chatId;
       const files = await filesCollection.find(query).sort({ uploadDate: -1 }).toArray();
-      
-      const mediaList = files.map(file => ({
-        id: file._id,
-        filename: file.filename,
-        contentType: file.contentType,
-        length: file.length,
-        uploadDate: file.uploadDate,
-        metadata: file.metadata
-      }));
-      
+      const mediaList = files.map(file => ({ id: file._id, filename: file.filename, contentType: file.contentType, length: file.length, uploadDate: file.uploadDate, metadata: file.metadata }));
       return res.status(200).json({ ok: true, media: mediaList });
     } catch (err) {
-      console.error('Error listing media:', err);
+      log.error('media_list_error', { error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });
 
-  // Global media fetch by GridFS ID
   router.get('/media/:id', async (req, res) => {
     const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({ ok: false, error: 'id is required' });
-    }
+    if (!id) return res.status(400).json({ ok: false, error: 'id is required' });
     try {
       const { connectToDB } = require('./db');
       const db = await connectToDB();
       const bucket = new GridFSBucket(db, { bucketName: 'media' });
       const files = await bucket.find({ _id: new ObjectId(id) }).toArray();
-      if (files.length === 0) {
-        return res.status(404).json({ ok: false, error: 'media not found' });
-      }
+      if (files.length === 0) return res.status(404).json({ ok: false, error: 'media not found' });
       const file = files[0];
       res.set('Content-Type', file.contentType || 'application/octet-stream');
       res.set('Content-Length', file.length);
-      if (file.metadata && file.metadata.fileName) {
-        res.set('Content-Disposition', `inline; filename="${file.metadata.fileName}"`);
-      }
+      if (file.metadata && file.metadata.fileName) res.set('Content-Disposition', `inline; filename="${file.metadata.fileName}"`);
       bucket.openDownloadStream(file._id).pipe(res);
     } catch (err) {
-      console.error('Error fetching media:', err);
+      log.error('media_fetch_error', { error: err.message });
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
   });

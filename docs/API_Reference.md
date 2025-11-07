@@ -142,6 +142,7 @@ Authentication: None (development). Add your own auth when exposing publicly.
 - **Rules:**
   - `url` must be a valid `http://` or `https://` URL
   - Idempotent: creates on first call, subsequent calls return success
+  - Logging: server logs redact webhook URLs (no credentials or query)
 - **Response 201:**
 ```json
 {

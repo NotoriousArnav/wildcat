@@ -27,11 +27,10 @@ COPY . .
 EXPOSE 3000
 
 # Default envs (can be overridden)
-ENV HOST=0.0.0.0 
-    PORT=3000
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
 # Healthcheck hitting /ping
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 
-  CMD node -e "fetch('http://localhost:3000/ping').then(r=>{if(r.ok)process.exit(0);process.exit(1)}).catch(()=>process.exit(1))"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD node -e "fetch('http://localhost:3000/ping').then(r=>{if(r.ok)process.exit(0);process.exit(1)}).catch(()=>process.exit(1))"
 
 CMD ["node", "index.js"]

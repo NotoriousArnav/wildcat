@@ -125,6 +125,8 @@ curl -X POST http://<wildcat-host>:3000/webhooks \
   -d '{"url":"https://your-n8n-host/webhook/<id>"}'
 ```
 
+Note: Server logs redact webhook URLs (credentials and query removed).
+
 For more examples, see `docs/API_Reference.md`.
 
 ## ⚠️ Important: Upcoming Breaking Changes
