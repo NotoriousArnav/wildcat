@@ -233,7 +233,7 @@ class SocketManager {
     if (msg.videoMessage?.caption) return msg.videoMessage.caption;
     if (msg.documentMessage?.caption) return msg.documentMessage.caption;
     return null;
-        }
-
+    }
+  }
 
 module.exports = SocketManager;
