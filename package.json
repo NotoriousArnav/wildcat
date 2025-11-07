@@ -7,23 +7,10 @@
     "countLines": "cat ./*.js | wc -l",
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "ping": "node scripts/cli.js ping",
-    "accounts": "node scripts/cli.js accounts",
-    "accounts:list": "node scripts/cli.js accounts:list",
-    "account:status": "node scripts/cli.js account:status",
-    "account:create": "node scripts/cli.js account:create",
-    "account:create:qr": "node scripts/cli.js account:create:qr",
-    "account:delete": "node scripts/cli.js account:delete",
-    "account:connect": "node scripts/cli.js account:connect",
-    "account:disconnect": "node scripts/cli.js account:disconnect",
-    "message:send": "node scripts/cli.js message:send",
-    "messages": "node scripts/cli.js messages",
-    "messages:all": "node scripts/cli.js messages:all",
-    "webhook:add": "node scripts/cli.js webhook:add",
-    "logs:app": "node scripts/cli.js logs:app",
-    "logs:http": "node scripts/cli.js logs:http",
-    "logs:baileys": "node scripts/cli.js logs:baileys",
-    "cli": "node scripts/cli.js"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "ping": "node scripts/cli.js ping"
   },
   "repository": {
     "type": "git",
@@ -54,6 +41,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.10",
     "tsx": "^4.20.6"
   }
