@@ -11,6 +11,12 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }
 });
 
+/**
+ * Create an Express router exposing REST endpoints to manage and interact with a single account's messaging socket and stored messages.
+ * @param {string} accountId - Account identifier used to scope socket operations, logging, and database queries.
+ * @param {Object} socketManager - Manager providing socket lifecycle and access methods (e.g., `getSocket`, `createSocket`, `removeSocket`).
+ * @returns {import('express').Router} An Express router with routes for sending text and media messages, replying, reacting, deleting, retrieving messages/media/chats, and controlling the account connection.
+ */
 function createAccountRouter(accountId, socketManager) {
   const router = express.Router();
   let db = null;
