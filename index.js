@@ -8,9 +8,18 @@ const { createAccountRouter } = require('./accountRouter');
 const { appLogger } = require('./logger');
 
 /**
- * Restore existing accounts from database on startup
- * - Mounts routes for each account
- * - Optionally auto-connects accounts that were previously connected
+ * Restore accounts from persistent storage, mount per-account routes, and conditionally auto-connect sockets.
+ *
+ * For each discovered account this mounts an account-specific router at `/accounts/{accountId}`.
+ * It will attempt to auto-connect a socket for the account when one of the following is true:
+ * - the environment variable `AUTO_CONNECT_ON_START` is set to `'true'`;
+ * - the account has a stored `status` that is not `'created'`;
+ * - a credentials document (`_id: 'creds'`) exists in the account's auth collection.
+ * If socket creation fails for an account, the account status is updated to `'not_started'`.
+ *
+ * @param {*} accountManager - Manager exposing account listing and status update operations (e.g., `listAccounts()`, `updateAccountStatus()`).
+ * @param {*} socketManager - Manager responsible for socket lifecycle and DB access (e.g., `createSocket()`, `db`).
+ * @param {import('express').Application} app - Express application on which per-account routers will be mounted.
  */
 async function restoreAccounts(accountManager, socketManager, app) {
   const log = appLogger('startup');
@@ -77,6 +86,13 @@ async function restoreAccounts(accountManager, socketManager, app) {
   }
 }
 
+/**
+ * Orchestrates application startup: initializes socket and account managers, constructs the Express app,
+ * mounts management routes, restores existing accounts, and starts the HTTP server.
+ *
+ * The function performs the necessary side effects for application readiness (route mounting, account restoration,
+ * and server start) and logs startup lifecycle events.
+ */
 async function main() {
   const log = appLogger('startup');
   log.info('initializing_api');

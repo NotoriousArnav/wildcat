@@ -2,6 +2,14 @@ const { ObjectId, GridFSBucket } = require('mongodb');
 const { appLogger } = require('./logger');
 const log = appLogger('routes');
 
+/**
+ * Send a text message via the configured WhatsApp socket and respond with the outcome.
+ *
+ * Responds with:
+ * - 200: { ok: true, messageId } when the message is sent successfully.
+ * - 400: { ok: false, error: 'to and message are required' } when `to` or `message` is missing from the request body.
+ * - 500: { ok: false, error: 'internal_error' } when an internal error occurs while sending the message.
+ */
 async function sendMessage(req, res) {
   const sock = req.app.locals.whatsapp_socket;
   const { to, message } = req.body || {};
@@ -17,6 +25,17 @@ async function sendMessage(req, res) {
   }
 }
 
+/**
+ * Streams a file from MongoDB GridFS to the HTTP response using the route `:id` parameter.
+ *
+ * If `req.params.id` is missing the function responds with 400 and `{ ok: false, error: 'id is required' }`.
+ * If no file matches the given id the function responds with 404 and `{ ok: false, error: 'file not found' }`.
+ * On success the response headers `Content-Type` and `Content-Length` are set (using file metadata) and the file is piped to the response.
+ * On unexpected errors the function logs the error and responds with 500 and `{ ok: false, error: 'internal_error' }`.
+ *
+ * @param {import('express').Request} req - Express request; expects `req.params.id` to contain the GridFS file id.
+ * @param {import('express').Response} res - Express response used to send headers and stream the file or error JSON.
+ */
 async function fetchFile(req, res) {
   const { id } = req.params;
   if (!id) return res.status(400).json({ ok: false, error: 'id is required' });
