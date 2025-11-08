@@ -33,6 +33,15 @@ function createAccountRouter(accountId, socketManager) {
     }
   })();
 
+  /**
+   * Load a quoted message by ID, preferring the live socket store and falling back to the database.
+   *
+   * May initialize the module's database connection if a DB lookup is required.
+   * @param {Object} socketInfo - Contains the account socket used to attempt loading the message from the live store.
+   * @param {string} quotedMessageId - The message ID of the quoted message to load.
+   * @param {string} chatId - The chat jid associated with the quoted message (used for live socket lookup and DB fallback).
+   * @returns {Object|null} The quoted message object formatted with `key`, `message`, and `messageTimestamp` when found; `null` otherwise.
+   */
   async function loadQuotedMessage(socketInfo, quotedMessageId, chatId) {
     try {
       let quotedMsg = null;
@@ -95,6 +104,20 @@ function createAccountRouter(accountId, socketManager) {
     }
   }
 
+  /**
+   * Persist a sent message record for the current account into the messages collection.
+   *
+   * Stores message metadata, optional media and quote information, and the raw message; returns `true` on success and `false` on failure.
+   *
+   * @param {object} sentMsg - The raw message object returned by the socket; must include `key.id`, `key.remoteJid`, and optionally `messageTimestamp`.
+   * @param {'text'|'image'|'video'|'audio'|'document'} messageType - The high-level message type to record.
+   * @param {object} [additionalData] - Optional metadata for the stored message.
+   * @param {string} [additionalData.text] - Text content for text messages.
+   * @param {string} [additionalData.caption] - Caption for media messages.
+   * @param {object} [additionalData.quotedMessage] - Quoted message object to attach to the stored record.
+   * @param {Array<string>} [additionalData.mentions] - Array of mentioned JIDs.
+   * @returns {boolean} `true` if the message document was inserted successfully, `false` otherwise.
+   */
   async function storeSentMessage(sentMsg, messageType, additionalData = {}) {
     try {
       if (!db) db = await connectToDB();
