@@ -9,7 +9,7 @@ url: "https://notoriousarnav.github.io/wildcat"
 
 # Theme & styling
 theme: jekyll-theme-minimal
-favicon: "/assets/favicon.svg"
+favicon: "/assets/favicon.ico"
 
 # Markdown settings
 markdown: kramdown
