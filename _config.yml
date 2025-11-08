@@ -1,0 +1,98 @@
+# GitHub Pages Configuration
+# Theme: Just the Docs - Professional documentation theme for Jekyll
+
+# Site settings
+title: "WILDCAT"
+tagline: "WhatsApp Integration Layer for Data Connectivity And Transfer"
+description: "Enterprise-grade Node.js REST API for WhatsApp messaging, media handling, and webhook delivery"
+baseurl: "/wildcat"
+url: "https://notoriousarnav.github.io"
+
+# Theme configuration
+theme: just-the-docs
+color_scheme: dark
+
+# Just the Docs specific settings
+logo: "assets/logo.svg"
+favicon_ico: "/assets/favicon.ico"
+search_enabled: true
+search_tokenizer_separator: /[\s/]+/
+aux_links:
+  "GitHub": https://github.com/NotoriousArnav/wildcat
+  "Docs": /docs/
+  "API": /docs/API_Reference/
+
+# Footer
+footer_content: "Copyright &copy; 2024 WILDCAT. Licensed under GPL 3.0"
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  input: GFM
+
+# Front matter defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: "docs"
+      type: "pages"
+    values:
+      layout: "default"
+      has_toc: true
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# SEO & Social
+seo:
+  type: SoftwareApplication
+  links:
+    - https://github.com/NotoriousArnav/wildcat
+
+twitter:
+  username: NotoriousArnav
+  card: summary_large_image
+
+og:
+  image: /assets/og-image.png
+  image_alt: "WILDCAT - WhatsApp REST API"
+
+# Custom variables
+author: "NotoriousArnav"
+github_username: NotoriousArnav
+github_repo: wildcat
+
+# Environment
+exclude:
+  - .gitignore
+  - .env.example
+  - node_modules
+  - package-lock.json
+  - __tests__
+  - jest.config.js
+  - Dockerfile
+  - docker-compose.yml
+  - AGENTS.md
+  - REVIEW_SUMMARY.md
+  - REPORT.md
+  - MIGRATION_PLAN.md
+  - .github
+  - Gemfile
+  - Gemfile.lock
+  - _layouts
+  - assets/style.css
+
+keep_files:
+  - docs
+  - assets
+
+# Performance
+incremental: true
