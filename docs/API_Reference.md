@@ -1,3 +1,11 @@
+---
+layout: default
+title: API Reference
+nav_order: 3
+description: "Complete REST API endpoint documentation"
+parent: Documentation
+---
+
 # Wildcat API Reference
 
 Version: 2.0.0 - Multi-Account Support

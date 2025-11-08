@@ -1,3 +1,11 @@
+---
+layout: default
+title: Architecture
+nav_order: 4
+description: "System design, module overview, and component relationships"
+parent: Documentation
+---
+
 # Architecture Overview
 
 This document describes the high-level architecture of the Wildcat WhatsApp integration system.

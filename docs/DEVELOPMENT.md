@@ -1,3 +1,11 @@
+---
+layout: default
+title: Development Guide
+nav_order: 5
+description: "Contributing guidelines and local development setup"
+parent: Documentation
+---
+
 # Development Guide
 
 Guidelines for contributing to the Wildcat project.

@@ -1,15 +1,29 @@
 # GitHub Pages Configuration
-# Theme: Minimal with dark mode customization
+# Theme: Just the Docs - Professional documentation theme for Jekyll
 
 # Site settings
 title: "WILDCAT"
-description: "WhatsApp Integration Layer for Data Connectivity And Transfer - Enterprise-grade Node.js REST API"
+tagline: "WhatsApp Integration Layer for Data Connectivity And Transfer"
+description: "Enterprise-grade Node.js REST API for WhatsApp messaging, media handling, and webhook delivery"
 baseurl: "/wildcat"
-url: "https://notoriousarnav.github.io/wildcat"
+url: "https://notoriousarnav.github.io"
 
-# Theme & styling
-theme: jekyll-theme-minimal
-favicon: "/assets/favicon.ico"
+# Theme configuration
+theme: just-the-docs
+color_scheme: dark
+
+# Just the Docs specific settings
+logo: "assets/logo.svg"
+favicon_ico: "/assets/favicon.ico"
+search_enabled: true
+search_tokenizer_separator: /[\s/]+/
+aux_links:
+  "GitHub": https://github.com/NotoriousArnav/wildcat
+  "Docs": /docs/
+  "API": /docs/API_Reference/
+
+# Footer
+footer_content: "Copyright &copy; 2024 WILDCAT. Licensed under GPL 3.0"
 
 # Markdown settings
 markdown: kramdown
@@ -24,13 +38,12 @@ defaults:
       type: "pages"
     values:
       layout: "default"
-      section_nav: "side"
-
-# Collections
-collections:
-  docs:
-    output: true
-    permalink: /:collection/:name
+  - scope:
+      path: "docs"
+      type: "pages"
+    values:
+      layout: "default"
+      has_toc: true
 
 # Plugins
 plugins:
@@ -52,9 +65,8 @@ og:
   image: /assets/og-image.png
   image_alt: "WILDCAT - WhatsApp REST API"
 
-# Custom variables for templating
+# Custom variables
 author: "NotoriousArnav"
-email: "contact@example.com"
 github_username: NotoriousArnav
 github_repo: wildcat
 
@@ -73,6 +85,10 @@ exclude:
   - REPORT.md
   - MIGRATION_PLAN.md
   - .github
+  - Gemfile
+  - Gemfile.lock
+  - _layouts
+  - assets/style.css
 
 keep_files:
   - docs
@@ -80,9 +96,3 @@ keep_files:
 
 # Performance
 incremental: true
-livereload: true
-
-# Custom styling - dark theme variables
-sass:
-  style: compressed
-  precision: 10

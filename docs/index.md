@@ -1,16 +1,20 @@
-<div align="center">
+---
+layout: default
+title: Documentation
+nav_order: 1
+description: "Complete guides for installing, configuring, and using WILDCAT"
+permalink: /docs/
+---
 
-# 📚 WILDCAT Documentation
+# WILDCAT Documentation
 
 Complete guides for installing, configuring, and using WILDCAT.
 
-</div>
-
 ---
 
-## 🎯 Quick Navigation
+## Quick Navigation
 
-### 🚀 Getting Started
+### Getting Started
 
 | Guide | For | Time |
 |-------|-----|------|

@@ -1,3 +1,11 @@
+---
+layout: default
+title: Setup Guide
+nav_order: 2
+description: "Installation, configuration, and deployment guide"
+parent: Documentation
+---
+
 # Setup Guide
 
 This guide will help you get Wildcat up and running on your system.
