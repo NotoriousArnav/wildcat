@@ -1,0 +1,88 @@
+# GitHub Pages Configuration
+# Theme: Minimal with dark mode customization
+
+# Site settings
+title: "WILDCAT"
+description: "WhatsApp Integration Layer for Data Connectivity And Transfer - Enterprise-grade Node.js REST API"
+baseurl: "/wildcat"
+url: "https://notoriousarnav.github.io/wildcat"
+
+# Theme & styling
+theme: jekyll-theme-minimal
+favicon: "/assets/favicon.ico"
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  input: GFM
+
+# Front matter defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+      section_nav: "side"
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# SEO & Social
+seo:
+  type: SoftwareApplication
+  links:
+    - https://github.com/NotoriousArnav/wildcat
+
+twitter:
+  username: NotoriousArnav
+  card: summary_large_image
+
+og:
+  image: /assets/og-image.png
+  image_alt: "WILDCAT - WhatsApp REST API"
+
+# Custom variables for templating
+author: "NotoriousArnav"
+email: "contact@example.com"
+github_username: NotoriousArnav
+github_repo: wildcat
+
+# Environment
+exclude:
+  - .gitignore
+  - .env.example
+  - node_modules
+  - package-lock.json
+  - __tests__
+  - jest.config.js
+  - Dockerfile
+  - docker-compose.yml
+  - AGENTS.md
+  - REVIEW_SUMMARY.md
+  - REPORT.md
+  - MIGRATION_PLAN.md
+  - .github
+
+keep_files:
+  - docs
+  - assets
+
+# Performance
+incremental: true
+livereload: true
+
+# Custom styling - dark theme variables
+sass:
+  style: compressed
+  precision: 10

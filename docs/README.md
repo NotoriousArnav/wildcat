@@ -1,56 +1,253 @@
-# Wildcat Documentation
+<div align="center">
 
-Welcome to the Wildcat WhatsApp Integration API documentation.
+# 📚 WILDCAT Documentation
 
-## Overview
+Complete guides for installing, configuring, and using WILDCAT.
 
-Wildcat is a comprehensive WhatsApp Business API integration built with Node.js, Express, and MongoDB. It supports multiple accounts, message handling, media storage, and webhook delivery.
+</div>
 
-## Documentation Structure
+---
 
-- **[API Reference](./API_Reference.md)** - Complete API endpoint documentation with examples
-- **[Setup Guide](./SETUP.md)** - Installation and configuration instructions
-- **[Architecture](./ARCHITECTURE.md)** - System design and components
-- **[Development](./DEVELOPMENT.md)** - Contributing guidelines and development workflow
+## 🎯 Quick Navigation
 
-## Quick Start
+### 🚀 Getting Started
 
-1. Install dependencies: `npm install`
-2. Configure environment variables in `.env`
-3. Start the server: `npm start`
-4. Create an account: `POST /accounts`
-5. Scan QR code and start sending messages!
+| Guide | For | Time |
+|-------|-----|------|
+| **[Setup Guide](./SETUP.md)** | First-time installation & environment configuration | 10 min |
+| **[Quick Start](#quick-start)** | Get up and running in 5 minutes | 5 min |
 
-## Key Features
+### 📖 Reference & Design
 
-- ✅ Multi-account WhatsApp support
-- ✅ Message sending (text, media, reactions)
-- ✅ Media storage in GridFS
-- ✅ Webhook delivery for incoming messages
-- ✅ RESTful API with JSON responses
-- ✅ Comprehensive logging and error handling
+| Document | For | Use When |
+|----------|-----|----------|
+| **[API Reference](./API_Reference.md)** | All REST endpoints with examples | Building integrations |
+| **[Architecture](./ARCHITECTURE.md)** | System design & module overview | Understanding the codebase |
 
-## n8n Integration (Example)
+### 👨‍💻 Development
 
-Use n8n to orchestrate workflows that react to Wildcat webhooks and send outbound WhatsApp messages.
+| Guide | For | Purpose |
+|-------|-----|---------|
+| **[Development](./DEVELOPMENT.md)** | Contributors & maintainers | Setting up dev environment |
 
-![n8n Workflow](../TEST_n8n_Workflow.jpeg)
+---
 
-Example steps:
-- Configure a public HTTP Trigger node in n8n (or use a webhook.site URL while testing).
-- Register the webhook in Wildcat:
-  ```bash
-  curl -X POST http://<wildcat-host>:3000/webhooks \
-    -H 'Content-Type: application/json' \
-    -d '{"url":"https://your-n8n-host/webhook/<id>"}'
-  ```
-- Add an HTTP Request node in n8n to send replies:
-  - Method: `POST`
-  - URL: `http://<wildcat-host>:3000/accounts/<accountId>/message/send`
-  - JSON body: `{ "to": "1234567890@s.whatsapp.net", "message": "Hello from n8n!" }`
+## ⚡ Quick Start
 
-See more examples in the [API Reference](./API_Reference.md).
+### 1. Prerequisites
 
-## Support
+```bash
+# Check Node.js version (18+ required)
+node --version
 
-For issues or questions, please [open an issue](https://github.com/NotoriousArnav/wildcat/issues) on GitHub.
+# Check MongoDB access
+# (Local: mongodb://localhost:27017 or Atlas URL)
+```
+
+### 2. Install & Configure
+
+```bash
+# Install dependencies
+npm ci
+
+# Copy environment template
+cp .env.example .env
+
+# Edit configuration
+# Required: MONGO_URL, DB_NAME
+nano .env
+```
+
+### 3. Start Server
+
+```bash
+# Development (auto-reload)
+npm run dev
+
+# Production
+npm start
+
+# Health check
+curl http://localhost:3000/ping
+```
+
+### 4. Create Account & Send Message
+
+```bash
+# Create account
+curl -X POST http://localhost:3000/accounts \
+  -H 'Content-Type: application/json' \
+  -d '{"id": "mybot", "name": "My Bot"}'
+
+# Scan QR code in terminal...
+
+# Send message
+curl -X POST http://localhost:3000/accounts/mybot/message/send \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "to": "1234567890@s.whatsapp.net",
+    "message": "Hello from WILDCAT! 🐱"
+  }'
+```
+
+✅ **Done!** Check your WhatsApp to see the message.
+
+---
+
+## 📖 Documentation Structure
+
+### [Setup Guide](./SETUP.md)
+- ✅ System requirements
+- ✅ Installation steps
+- ✅ Environment variables
+- ✅ Database setup (MongoDB)
+- ✅ Docker configuration
+- ✅ Troubleshooting
+
+### [API Reference](./API_Reference.md)
+- 🔌 Account endpoints
+- 💬 Message endpoints
+- 📁 Media endpoints
+- 🔗 Webhook endpoints
+- ⚠️ Error codes & handling
+- 📊 Example workflows
+
+### [Architecture](./ARCHITECTURE.md)
+- 🏗️ System components
+- 📡 Socket communication
+- 💾 MongoDB schema
+- 🔄 Message flow
+- 🧩 Module dependencies
+
+### [Development](./DEVELOPMENT.md)
+- 🛠️ Local development setup
+- 📝 Code style guidelines
+- ✅ Testing procedures
+- 🚀 Contributing workflow
+- 📚 Code structure
+
+---
+
+## 🎓 Integration Examples
+
+### n8n + WILDCAT Workflow
+
+Automate WhatsApp responses using n8n visual workflows:
+
+```
+WhatsApp Message Received
+    ↓
+Webhook → n8n HTTP Trigger
+    ↓
+Process/Transform in n8n
+    ↓
+HTTP Request → WILDCAT API
+    ↓
+Send WhatsApp Reply
+```
+
+**Setup:**
+
+```bash
+# 1. Register webhook in WILDCAT
+curl -X POST http://localhost:3000/webhooks \
+  -H 'Content-Type: application/json' \
+  -d '{"url": "https://your-n8n-host/webhook/<id>"}'
+
+# 2. Create n8n HTTP Request node
+# Method: POST
+# URL: http://wildcat-host:3000/accounts/mybot/message/send
+# Body: { "to": "{{ $json.from }}", "message": "Your response" }
+```
+
+### Other Platforms
+
+- **Zapier** - Receive webhook → Trigger Zap → Send message
+- **Make.com** - Complex workflows with multiple steps
+- **Custom Apps** - Direct REST API integration
+
+---
+
+## ❓ Frequently Asked Questions
+
+### How do I get started?
+
+1. Read [Setup Guide](./SETUP.md)
+2. Install WILDCAT
+3. Create your first account
+4. Check [API Reference](./API_Reference.md) for endpoints
+
+### What's the difference between this and official WhatsApp API?
+
+WILDCAT uses reverse-engineered WhatsApp Web protocols (unofficial), while the official API requires business verification and approvals. WILDCAT is faster to set up but has risks.
+
+### Is it production-ready?
+
+**Not yet.** v2 has security gaps (no auth, no rate limiting). Use it for development/testing. v3.0 (coming Q2 2025) will have production-grade security.
+
+### Can I use this for marketing/bulk messaging?
+
+⚠️ **Not recommended.** WhatsApp's Terms of Service prohibit automated marketing. Heavy use may result in account bans.
+
+### What about WhatsApp rate limits?
+
+WhatsApp typically allows ~60 messages/minute. Exceeding limits causes temporary blocks. WILDCAT will add rate limiting in v3.0.
+
+### How do I authenticate the API?
+
+Currently, anyone with server access can send messages. **DO NOT expose to internet** without a proxy with authentication. v3.0 will add built-in auth.
+
+---
+
+## 🔗 External Resources
+
+### WhatsApp & Baileys
+- [Baileys Library](https://github.com/WhiskeySockets/Baileys) - WhatsApp Web reverse engineering
+- [WhatsApp Docs](https://www.whatsapp.com/business/downloads/) - Official business docs
+
+### Technologies
+- [Node.js Docs](https://nodejs.org/docs/)
+- [Express.js Guide](https://expressjs.com/)
+- [MongoDB Manual](https://docs.mongodb.com/manual/)
+
+### Related Projects
+- [n8n Workflow Automation](https://n8n.io/)
+- [Socket.io Documentation](https://socket.io/docs/)
+
+---
+
+## 🆘 Getting Help
+
+| Issue | Action |
+|-------|--------|
+| Installation problems | See [Setup Guide](./SETUP.md#troubleshooting) |
+| API questions | Check [API Reference](./API_Reference.md) |
+| Want to contribute | Read [Development Guide](./DEVELOPMENT.md) |
+| Found a bug | [Open GitHub Issue](https://github.com/NotoriousArnav/wildcat/issues) |
+
+---
+
+## 📊 Documentation Stats
+
+- **Total Pages:** 5 documents
+- **Total Words:** ~10,000+
+- **Code Examples:** 50+
+- **Diagrams:** System architecture & flows
+- **Last Updated:** November 2025
+
+---
+
+## 🎯 Next Steps
+
+- **Just starting?** → [Setup Guide](./SETUP.md)
+- **Ready to build?** → [API Reference](./API_Reference.md)
+- **Want to contribute?** → [Development Guide](./DEVELOPMENT.md)
+- **Curious about design?** → [Architecture](./ARCHITECTURE.md)
+
+---
+
+<div align="center">
+
+**[← Back to README](../README.md)** • **[GitHub](https://github.com/NotoriousArnav/wildcat)**
+
+</div>
