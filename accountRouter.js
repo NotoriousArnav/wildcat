@@ -36,11 +36,12 @@ function createAccountRouter(accountId, socketManager) {
   /**
    * Load a quoted message by ID, preferring the live socket store and falling back to the database.
    *
-   * May initialize the module's database connection if a DB lookup is required.
-   * @param {Object} socketInfo - Contains the account socket used to attempt loading the message from the live store.
+   * If the message is not available in the live socket store, attempts a database lookup and may
+   * initialize the module database connection to retrieve and normalize a stored message shape.
+   * @param {Object} socketInfo - Object containing the `socket` instance used for the live-store lookup.
    * @param {string} quotedMessageId - The message ID of the quoted message to load.
-   * @param {string} chatId - The chat jid associated with the quoted message (used for live socket lookup and DB fallback).
-   * @returns {Object|null} The quoted message object formatted with `key`, `message`, and `messageTimestamp` when found; `null` otherwise.
+   * @param {string} chatId - The chat JID associated with the quoted message (used for live lookup and DB query).
+   * @returns {Object|null} The quoted message formatted with `key`, `message`, and `messageTimestamp` when found; `null` otherwise.
    */
   async function loadQuotedMessage(socketInfo, quotedMessageId, chatId) {
     try {
@@ -105,12 +106,10 @@ function createAccountRouter(accountId, socketManager) {
   }
 
   /**
-   * Persist a sent message record for the current account into the messages collection.
+   * Persist a sent message record for the current account in the messages collection.
    *
-   * Stores message metadata, optional media and quote information, and the raw message; returns `true` on success and `false` on failure.
-   *
-   * @param {object} sentMsg - The raw message object returned by the socket; must include `key.id`, `key.remoteJid`, and optionally `messageTimestamp`.
-   * @param {'text'|'image'|'video'|'audio'|'document'} messageType - The high-level message type to record.
+   * @param {object} sentMsg - Raw message object returned by the socket; must include `key.id`, `key.remoteJid`, and optionally `messageTimestamp`.
+   * @param {'text'|'image'|'video'|'audio'|'document'} messageType - High-level message type to record.
    * @param {object} [additionalData] - Optional metadata for the stored message.
    * @param {string} [additionalData.text] - Text content for text messages.
    * @param {string} [additionalData.caption] - Caption for media messages.
