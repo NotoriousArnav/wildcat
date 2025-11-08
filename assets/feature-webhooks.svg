@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#25D366;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1DA851;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="200" height="200" fill="#1a1a1a" rx="20"/>
+  
+  <!-- Webhook visualization -->
+  <g>
+    <!-- Source box -->
+    <rect x="20" y="60" width="60" height="60" rx="5" fill="none" stroke="url(#grad2)" stroke-width="3"/>
+    <text x="50" y="95" font-family="Arial, sans-serif" font-size="10" fill="#25D366" text-anchor="middle" font-weight="bold">
+      MSG
+    </text>
+    
+    <!-- Arrow right -->
+    <path d="M 85 90 L 115 90" stroke="url(#grad2)" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <circle cx="100" cy="85" r="3" fill="#25D366"/>
+    
+    <!-- Server box -->
+    <rect x="120" y="60" width="60" height="60" rx="5" fill="none" stroke="url(#grad2)" stroke-width="3"/>
+    <text x="150" y="95" font-family="Arial, sans-serif" font-size="10" fill="#25D366" text-anchor="middle" font-weight="bold">
+      API
+    </text>
+    
+    <!-- Webhook illustration -->
+    <g transform="translate(50, 140)">
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#FF570A" stroke-width="2" stroke-dasharray="5,5"/>
+      <polygon points="40,0 45,-3 45,3" fill="#FF570A"/>
+      <text x="55" y="5" font-family="Arial, sans-serif" font-size="12" fill="#FF570A" font-weight="bold">
+        Webhook
+      </text>
+    </g>
+  </g>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#25D366" />
+    </marker>
+  </defs>
+  
+  <!-- Text label -->
+  <text x="100" y="25" font-family="Arial, sans-serif" font-size="14" fill="#25D366" font-weight="bold" text-anchor="middle">
+    Webhook Ready
+  </text>
+</svg>

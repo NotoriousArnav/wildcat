@@ -40,6 +40,14 @@ Perfect for **chatbots**, **CRM integrations**, **marketing automation**, and **
 | 🐳 **Docker Support** | Production-ready containerization |
 | 📊 **Structured Logging** | JSON-based logging for monitoring & debugging |
 
+<div align="center">
+
+![Multi-Account](./assets/feature-multi-account.svg)
+![Webhooks](./assets/feature-webhooks.svg)
+![Docker Ready](./assets/feature-docker.svg)
+
+</div>
+
 ### ⚠️ Important Considerations
 
 **Limitations:**
@@ -188,6 +196,21 @@ npm run test:coverage
 ```
 
 For advanced CLI usage, see the [Development Guide](./docs/DEVELOPMENT.md).
+
+## 🏗️ System Architecture
+
+WILDCAT follows a modular architecture designed for scalability and maintainability:
+
+![System Architecture](./assets/architecture.svg)
+
+**Core Components:**
+- **Express.js API** - REST endpoints and socket management
+- **Baileys Integration** - WhatsApp Web protocol reverse-engineering
+- **MongoDB** - Persistent storage for auth state and messages
+- **GridFS** - Distributed media file storage
+- **Webhook Handler** - External service integration (n8n, Zapier, etc.)
+
+For detailed architecture information, see [Architecture Documentation](./docs/ARCHITECTURE.md).
 
 
 ## 🐳 Docker Deployment
