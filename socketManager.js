@@ -65,21 +65,21 @@ class SocketManager {
           this.sockets.delete(accountId);
           socketLog.info('reconnecting_account', { accountId, delaySeconds: 5 });
           try {
-            await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'reconnecting', updatedAt: new Date() } });
+            await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'reconnecting', updatedAt: new Date() } });
           } catch (_) {}
           setTimeout(() => this.createSocket(accountId, collName), 5000);
         } else {
           socketInfo.status = 'logged_out';
           socketLog.info('account_logged_out', { accountId });
           try {
-            await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'logged_out', updatedAt: new Date() } });
+            await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'logged_out', updatedAt: new Date() } });
           } catch (_) {}
         }
       } else if (connection === 'open') {
         socketInfo.status = 'connected';
         socketLog.info('account_connected', { accountId });
         try {
-          await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'connected', updatedAt: new Date() } });
+          await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connected', updatedAt: new Date() } });
         } catch (_) {}
         if (process.env.ADMIN_NUMBER) {
           try {
@@ -90,7 +90,7 @@ class SocketManager {
         }
        } else if (connection === 'connecting') {
         try {
-          await accountsCol.updateOne({ _id: accountId }, { $set: { status: 'connecting', updatedAt: new Date() } });
+          await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connecting', updatedAt: new Date() } });
         } catch (_) {}
       }
     });
