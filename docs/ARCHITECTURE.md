@@ -73,6 +73,7 @@ This document describes the high-level architecture of the Wildcat WhatsApp inte
 - **`media.chunks`** - GridFS file data chunks
 
 ### Message Document Structure
+
 ```json
 {
   "accountId": "myaccount",

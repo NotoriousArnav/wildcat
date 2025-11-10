@@ -12,194 +12,169 @@ Complete guides for installing, configuring, and using WILDCAT.
 
 ---
 
-## Quick Navigation
+## 🚀 Start Here
 
-### Getting Started
+### New to WILDCAT?
 
-| Guide | For | Time |
-|-------|-----|------|
-| **[Setup Guide](./SETUP.md)** | First-time installation & environment configuration | 10 min |
-| **[Quick Start](#quick-start)** | Get up and running in 5 minutes | 5 min |
+| Guide | Time | Learn |
+|-------|------|-------|
+| **[5-Minute Quickstart](/docs/getting-started/quickstart/)** | 5 min | Get WILDCAT running instantly |
+| **[Detailed Installation Guide](/docs/getting-started/installation/)** | 15 min | Step‑by‑step setup with all options |
 
-### 📖 Reference & Design
+### 🔌 Building with WILDCAT
 
-| Document | For | Use When |
-|----------|-----|----------|
-| **[API Reference](./API_Reference.md)** | All REST endpoints with examples | Building integrations |
-| **[Architecture](./ARCHITECTURE.md)** | System design & module overview | Understanding the codebase |
+| Resource | Purpose | Time |
+|----------|---------|------|
+| **[API Reference](/docs/api/endpoints/)** | All REST endpoints with examples | Reference |
+| **[Integration Examples](/docs/guides/integration-examples/)** | n8n, Zapier, Node.js, Python | 15-30 min |
+| **[Deployment Guide](/docs/guides/deployment/)** | VPS, Docker, Heroku, AWS, home server | 30-60 min |
 
-### 👨‍💻 Development
+### 🆘 Need Help?
 
-| Guide | For | Purpose |
-|-------|-----|---------|
-| **[Development](./DEVELOPMENT.md)** | Contributors & maintainers | Setting up dev environment |
+| Issue | Solution |
+|-------|----------|
+| **Problems?** | Check [Troubleshooting & FAQ](/docs/troubleshooting/faq/) |
+| **Questions?** | Browse [Getting Started](/docs/getting-started/) |
+| **Stuck?** | [Search GitHub Issues](https://github.com/NotoriousArnav/wildcat/issues) |
 
 ---
 
-## ⚡ Quick Start
+## 📚 Documentation Sections
 
-### 1. Prerequisites
+### [Getting Started](/docs/getting-started/)
 
+- **[Quickstart](/docs/getting-started/quickstart/)** - 5-minute setup guide
+- **[Installation](/docs/getting-started/installation/)** - Complete installation with all options
+- Prerequisites, environment setup, first run
+
+### [API Reference](/docs/api/endpoints/)
+
+- All 20+ REST endpoints documented
+- Request/response examples
+- Authentication, error codes, best practices
+
+### [Guides](/docs/guides/)
+
+- **[Deployment Guide](/docs/guides/deployment/)** - VPS, Docker, Heroku, AWS, home server
+- **[Integration Examples](/docs/guides/integration-examples/)** - Real-world workflows
+
+### [Troubleshooting](/docs/troubleshooting/)
+
+- **[FAQ & Solutions](/docs/troubleshooting/faq/)** - Common problems and fixes
+
+---
+
+## 📖 Full Documentation Index
+
+### [Getting Started](/docs/getting-started/)
+Guide new users through setup and first steps.
+
+- **[Quickstart](/docs/getting-started/quickstart/)** - Get WILDCAT running in 5 minutes
+- **[Installation](/docs/getting-started/installation/)** - Complete step‑by‑step installation with all options
+
+### [API Reference](/docs/api/endpoints/)
+Complete reference for all REST endpoints.
+
+- All 20+ endpoints documented
+- Request/response examples
+- Error handling and status codes
+- Authentication overview
+
+### [Guides](/docs/guides/)
+Practical guides for real-world scenarios.
+
+- **[Deployment Guide](/docs/guides/deployment/)** - Deploy to VPS, Docker, Heroku, AWS EC2, or home server
+- **[Integration Examples](/docs/guides/integration-examples/)** - Integrate with n8n, Zapier, Node.js, Python
+
+### [Troubleshooting](/docs/troubleshooting/)
+Solutions to common problems.
+
+- **[FAQ & Solutions](/docs/troubleshooting/faq/)** - Frequently asked questions and how to fix common issues
+- Debug tips, error messages, and support resources
+
+---
+
+## 🎯 Quick Answers
+
+### How do I install WILDCAT?
+
+**Start here:** [Installation Guide](/docs/getting-started/installation/)
+
+Quick version:
 ```bash
-# Check Node.js version (18+ required)
-node --version
-
-# Check MongoDB access
-# (Local: mongodb://localhost:27017 or Atlas URL)
-```
-
-### 2. Install & Configure
-
-```bash
-# Install dependencies
 npm ci
-
-# Copy environment template
 cp .env.example .env
-
-# Edit configuration
-# Required: MONGO_URL, DB_NAME
-nano .env
-```
-
-### 3. Start Server
-
-```bash
-# Development (auto-reload)
+# Edit .env with MONGO_URL and DB_NAME
 npm run dev
-
-# Production
-npm start
-
-# Health check
-curl http://localhost:3000/ping
 ```
 
-### 4. Create Account & Send Message
+### What are the main features?
 
-```bash
-# Create account
-curl -X POST http://localhost:3000/accounts \
-  -H 'Content-Type: application/json' \
-  -d '{"id": "mybot", "name": "My Bot"}'
+- ✅ Send/receive WhatsApp messages via REST API
+- ✅ Manage multiple WhatsApp accounts
+- ✅ Media file support (images, videos, documents)
+- ✅ Webhook integration for received messages
+- ✅ Message reactions and replies
+- ✅ Message deletion and editing
+- ✅ Get chat lists and conversation history
 
-# Scan QR code in terminal...
+### Is this production-ready?
 
-# Send message
-curl -X POST http://localhost:3000/accounts/mybot/message/send \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "to": "1234567890@s.whatsapp.net",
-    "message": "Hello from WILDCAT! 🐱"
-  }'
-```
+**Not yet.** v2 is suitable for development/testing. Production deployment recommended for v3.0+ (Q2 2025) which will include:
+- Built-in authentication and rate limiting
+- Security hardening
+- Performance optimizations
+- TLS encryption
 
-✅ **Done!** Check your WhatsApp to see the message.
+### Can I use this commercially?
+
+⚠️ **Use at your own risk.** WILDCAT uses reverse-engineered WhatsApp Web protocols (unofficial). WhatsApp's Terms of Service prohibit automated messaging for marketing. Heavy use may result in account restrictions.
+
+### How do I deploy to production?
+
+See [Deployment Guide](/docs/guides/deployment/) for:
+- Virtual Private Server (VPS) setup
+- Docker containerization
+- Heroku hosting
+- AWS EC2 deployment
+- Home server/Raspberry Pi
+
+### Where can I find API documentation?
+
+See [API Reference](/docs/api/endpoints/) - all REST endpoints with examples, error codes, and best practices.
+
+### How do I integrate with other services?
+
+See [Integration Examples](/docs/guides/integration-examples/):
+- n8n visual workflows
+- Zapier automations
+- Node.js client code
+- Python client code
 
 ---
 
-## 📖 Documentation Structure
+## 🆘 Support
 
-### [Setup Guide](./SETUP.md)
-- ✅ System requirements
-- ✅ Installation steps
-- ✅ Environment variables
-- ✅ Database setup (MongoDB)
-- ✅ Docker configuration
-- ✅ Troubleshooting
-
-### [API Reference](./API_Reference.md)
-- 🔌 Account endpoints
-- 💬 Message endpoints
-- 📁 Media endpoints
-- 🔗 Webhook endpoints
-- ⚠️ Error codes & handling
-- 📊 Example workflows
-
-### [Architecture](./ARCHITECTURE.md)
-- 🏗️ System components
-- 📡 Socket communication
-- 💾 MongoDB schema
-- 🔄 Message flow
-- 🧩 Module dependencies
-
-### [Development](./DEVELOPMENT.md)
-- 🛠️ Local development setup
-- 📝 Code style guidelines
-- ✅ Testing procedures
-- 🚀 Contributing workflow
-- 📚 Code structure
+| Need Help? | Go To |
+|------------|-------|
+| **Installation issues** | [Installation Guide](/docs/getting-started/installation/) |
+| **Can't send messages** | [Troubleshooting FAQ](/docs/troubleshooting/faq/#messaging-issues) |
+| **Webhook not working** | [Troubleshooting FAQ](/docs/troubleshooting/faq/#webhooks--integration) |
+| **Deployment questions** | [Deployment Guide](/docs/guides/deployment/) |
+| **API endpoint help** | [API Reference](/docs/api/endpoints/) |
+| **Database issues** | [Troubleshooting FAQ](/docs/troubleshooting/faq/#database--mongodb) |
+| **Connection problems** | [Troubleshooting FAQ](/docs/troubleshooting/faq/#connection--session) |
+| **General questions** | [FAQ & Troubleshooting](/docs/troubleshooting/faq/) |
 
 ---
 
-## 🎓 Integration Examples
+## 📚 Related Documentation
 
-### n8n + WILDCAT Workflow
-
-Automate WhatsApp responses using n8n visual workflows:
-
-```
-WhatsApp Message Received
-    ↓
-Webhook → n8n HTTP Trigger
-    ↓
-Process/Transform in n8n
-    ↓
-HTTP Request → WILDCAT API
-    ↓
-Send WhatsApp Reply
-```
-
-**Setup:**
-
-```bash
-# 1. Register webhook in WILDCAT
-curl -X POST http://localhost:3000/webhooks \
-  -H 'Content-Type: application/json' \
-  -d '{"url": "https://your-n8n-host/webhook/<id>"}'
-
-# 2. Create n8n HTTP Request node
-# Method: POST
-# URL: http://wildcat-host:3000/accounts/mybot/message/send
-# Body: { "to": "{{ $json.from }}", "message": "Your response" }
-```
-
-### Other Platforms
-
-- **Zapier** - Receive webhook → Trigger Zap → Send message
-- **Make.com** - Complex workflows with multiple steps
-- **Custom Apps** - Direct REST API integration
-
----
-
-## ❓ Frequently Asked Questions
-
-### How do I get started?
-
-1. Read [Setup Guide](./SETUP.md)
-2. Install WILDCAT
-3. Create your first account
-4. Check [API Reference](./API_Reference.md) for endpoints
-
-### What's the difference between this and official WhatsApp API?
-
-WILDCAT uses reverse-engineered WhatsApp Web protocols (unofficial), while the official API requires business verification and approvals. WILDCAT is faster to set up but has risks.
-
-### Is it production-ready?
-
-**Not yet.** v2 has security gaps (no auth, no rate limiting). Use it for development/testing. v3.0 (coming Q2 2025) will have production-grade security.
-
-### Can I use this for marketing/bulk messaging?
-
-⚠️ **Not recommended.** WhatsApp's Terms of Service prohibit automated marketing. Heavy use may result in account bans.
-
-### What about WhatsApp rate limits?
-
-WhatsApp typically allows ~60 messages/minute. Exceeding limits causes temporary blocks. WILDCAT will add rate limiting in v3.0.
-
-### How do I authenticate the API?
-
-Currently, anyone with server access can send messages. **DO NOT expose to internet** without a proxy with authentication. v3.0 will add built-in auth.
+**Legacy Documentation** (archived format, still valid for reference):
+- [SETUP.md](./SETUP.md) - Original setup guide
+- [API_Reference.md](./API_Reference.md) - Original endpoint reference
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
+- [DEVELOPMENT.md](./DEVELOPMENT.md) - Development guidelines
 
 ---
 
@@ -207,46 +182,29 @@ Currently, anyone with server access can send messages. **DO NOT expose to inter
 
 ### WhatsApp & Baileys
 - [Baileys Library](https://github.com/WhiskeySockets/Baileys) - WhatsApp Web reverse engineering
-- [WhatsApp Docs](https://www.whatsapp.com/business/downloads/) - Official business docs
+- [WhatsApp Business](https://www.whatsapp.com/business/) - Official WhatsApp Business info
 
 ### Technologies
 - [Node.js Docs](https://nodejs.org/docs/)
 - [Express.js Guide](https://expressjs.com/)
 - [MongoDB Manual](https://docs.mongodb.com/manual/)
 
-### Related Projects
-- [n8n Workflow Automation](https://n8n.io/)
-- [Socket.io Documentation](https://socket.io/docs/)
-
----
-
-## 🆘 Getting Help
-
-| Issue | Action |
-|-------|--------|
-| Installation problems | See [Setup Guide](./SETUP.md#troubleshooting) |
-| API questions | Check [API Reference](./API_Reference.md) |
-| Want to contribute | Read [Development Guide](./DEVELOPMENT.md) |
-| Found a bug | [Open GitHub Issue](https://github.com/NotoriousArnav/wildcat/issues) |
+### Integrations
+- [n8n](https://n8n.io/) - Workflow automation
+- [Zapier](https://zapier.com/) - App integration
+- [Socket.io](https://socket.io/docs/) - Real-time communication
 
 ---
 
 ## 📊 Documentation Stats
 
-- **Total Pages:** 5 documents
-- **Total Words:** ~10,000+
-- **Code Examples:** 50+
-- **Diagrams:** System architecture & flows
+- **Total Pages:** 12 comprehensive documents
+- **Code Examples:** 100+ copy‑paste ready commands
+- **Endpoints Documented:** 20+ REST API endpoints
+- **Deployment Options:** 5 (VPS, Docker, Heroku, AWS, home server)
+- **Integration Examples:** 4 (n8n, Zapier, Node.js, Python)
+- **Troubleshooting Q&A:** 30+ solutions
 - **Last Updated:** November 2025
-
----
-
-## 🎯 Next Steps
-
-- **Just starting?** → [Setup Guide](./SETUP.md)
-- **Ready to build?** → [API Reference](./API_Reference.md)
-- **Want to contribute?** → [Development Guide](./DEVELOPMENT.md)
-- **Curious about design?** → [Architecture](./ARCHITECTURE.md)
 
 ---
 

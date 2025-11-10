@@ -19,18 +19,22 @@ This guide will help you get Wildcat up and running on your system.
 ## Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/NotoriousArnav/wildcat.git
    cd wildcat
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment variables:**
+
    Create a `.env` file in the root directory:
+
    ```env
    # Server configuration
    HOST=0.0.0.0
@@ -46,7 +50,7 @@ This guide will help you get Wildcat up and running on your system.
    # Optional: Admin number to receive startup ping
    # ADMIN_NUMBER=1234567890@s.whatsapp.net
 
-   # Auto connect restored accounts
+   # Auto‑connect restored accounts
    # AUTO_CONNECT_ON_START=true
    ```
 
@@ -54,6 +58,7 @@ This guide will help you get Wildcat up and running on your system.
    Make sure MongoDB is running on your system.
 
 5. **Start the server:**
+
    ```bash
    npm start
    ```
@@ -63,6 +68,7 @@ This guide will help you get Wildcat up and running on your system.
 ## Creating Your First Account
 
 1. **Create an account:**
+
    ```bash
    curl -X POST http://localhost:3000/accounts \
      -H 'Content-Type: application/json' \
@@ -70,6 +76,7 @@ This guide will help you get Wildcat up and running on your system.
    ```
 
 2. **Get QR code:**
+
    ```bash
    curl http://localhost:3000/accounts/myaccount/status
    ```
@@ -81,6 +88,7 @@ This guide will help you get Wildcat up and running on your system.
    - Scan the QR code
 
 4. **Verify connection:**
+
    ```bash
    curl http://localhost:3000/accounts/myaccount/status
    ```
@@ -89,6 +97,7 @@ This guide will help you get Wildcat up and running on your system.
 ## Testing the API
 
 Send a test message:
+
 ```bash
 curl -X POST http://localhost:3000/accounts/myaccount/message/send \
   -H 'Content-Type: application/json' \
@@ -103,11 +112,13 @@ curl -X POST http://localhost:3000/accounts/myaccount/message/send \
 A `Dockerfile` is provided to build a production image (includes `ffmpeg` for audio conversion).
 
 - Build the image:
+
 ```bash
 docker build -t wildcat:latest .
 ```
 
 - Run with local MongoDB (host network example):
+
 ```bash
 docker run --name wildcat \
   -p 3000:3000 \
@@ -120,6 +131,7 @@ docker run --name wildcat \
 ```
 
 - Run with a MongoDB container on the same network:
+
 ```bash
 docker network create wildcat-net || true
 
@@ -137,6 +149,7 @@ Health check: `GET /ping` should return `{ ok: true, pong: true }`.
 ## Development Mode
 
 For development with auto-restart:
+
 ```bash
 npm run dev
 ```

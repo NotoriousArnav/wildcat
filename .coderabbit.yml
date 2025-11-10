@@ -30,18 +30,18 @@ reviews:
     - path: "**/*.md"
       instructions: |
         Check docs for accuracy with implemented routes and environment variables. Keep README and docs in sync with changes.
-ignore:
-  # Ignore large or generated files that create noise
-  - "node_modules/**"
-  - "**/*.lock"
-  - "**/*.min.*"
-  - "**/dist/**"
-  - "**/build/**"
-  - "**/.logs/**"
-  - "**/*.png"
-  - "**/*.jpg"
-  - "**/*.jpeg"
-  - "**/*.gif"
+  path_filters:
+    # Exclude large or generated files that create noise
+    - "!node_modules/**"
+    - "!**/*.lock"
+    - "!**/*.min.*"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/.logs/**"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
 
 # Optionally run linters/tools CodeRabbit can use
 # tools:
