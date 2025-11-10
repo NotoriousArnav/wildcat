@@ -11,6 +11,22 @@ permalink: /docs/getting-started/quickstart/
 
 Get WILDCAT up and running in just 5 minutes with this streamlined setup.
 
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    5-Minute Setup Timeline                      │
+└─────────────────────────────────────────────────────────────────┘
+
+    0:00          1:00          2:00          3:30          5:00
+    ════          ════          ════          ════          ════
+    │             │             │             │             │
+    ▼             ▼             ▼             ▼             ▼
+  Clone &      Configure     Start        Create &       Send First
+  Install       .env        Server       QR Scan         Message
+  
+  npm ci        Edit         npm run      curl POST      ✅ Done!
+               MONGO_URL        dev       /accounts
+```
+
 ## Prerequisites
 
 - **Node.js** 18+ ([download](https://nodejs.org/))
@@ -170,6 +186,28 @@ Replace `1234567890` with a real WhatsApp number (without country code prefix, j
 ## 🎉 You're Done!
 
 You now have a working WILDCAT instance. Here's what's next:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     What You Just Built                         │
+└─────────────────────────────────────────────────────────────────┘
+
+    Your App                 WILDCAT Server           WhatsApp Web
+    ════════                 ══════════════           ════════════
+    
+    🖥️  REST Client     ◄──►   🖥️  Node.js       ◄──►   📱 Account
+    curl/Postman                Express                 Authenticated
+    n8n/Zapier                  MongoDB                 Ready to send
+    Custom code                 Baileys                 & receive
+    
+    
+    Available Now:
+    ═══════════════
+    ✅ Send text messages         ✅ Upload media files
+    ✅ Send images/videos/audio   ✅ React to messages
+    ✅ Send documents             ✅ Delete messages
+    ✅ Reply to messages          ✅ Webhook support
+```
 
 ### Next Steps
 

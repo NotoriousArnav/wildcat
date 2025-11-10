@@ -101,6 +101,30 @@ pre code {
   color: #e6edf3;
 }
 
+/* ASCII Art in Code Blocks */
+pre code,
+pre.highlight code {
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  white-space: pre;
+  word-wrap: normal;
+}
+
+/* Ensure ASCII diagrams don't wrap */
+.ascii-diagram,
+pre:has(code) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Better monospace rendering for diagrams */
+pre code {
+  letter-spacing: 0;
+  font-variant-ligatures: none;
+  text-rendering: optimizeLegibility;
+}
+
 /* Blockquotes */
 blockquote {
   border-left: 4px solid var(--brand-primary);

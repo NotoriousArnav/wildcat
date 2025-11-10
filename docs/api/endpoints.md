@@ -15,6 +15,26 @@ Complete documentation of all WILDCAT REST API endpoints.
 
 **Response Format:** All responses are JSON with `{ ok: boolean, ...data }`
 
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      WILDCAT API Structure                      │
+└─────────────────────────────────────────────────────────────────┘
+
+   Health             Accounts           Messaging           Chats
+   ══════             ════════           ═════════           ═════
+   GET /ping          POST /accounts     POST .../send       GET .../chats
+                      GET /accounts      POST .../image      GET .../messages
+                      GET /:id           POST .../video
+                      DELETE /:id        POST .../audio
+                                         POST .../document
+                                         POST .../reply
+   Connection         Webhooks           POST .../react
+   ══════════         ════════           POST .../delete
+   POST .../connect   POST /webhooks
+   POST .../disconnect
+   GET .../status
+```
+
 ---
 
 ## Health & Status
@@ -42,6 +62,23 @@ curl http://localhost:3000/ping
 ---
 
 ## Accounts Management
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Account Lifecycle                         │
+└──────────────────────────────────────────────────────────────┘
+
+1. CREATE          2. QR CODE         3. AUTHENTICATE      4. READY
+   ══════             ═════════           ═══════════          ═════
+   POST /accounts  ─► Scan QR Code    ─► WhatsApp Auth    ─► Send/Receive
+   │                  in terminal         session saved       messages
+   └─► status: "connecting"                                    │
+                                                               │
+5. DISCONNECT (optional)         6. DELETE (if needed)        │
+   ══════════════════               ═══════════════           │
+   POST .../disconnect          ◄─  DELETE /accounts/:id  ◄───┘
+   Temporary logout                 Permanent removal
+```
 
 ### Create Account
 
@@ -205,6 +242,36 @@ curl -X DELETE http://localhost:3000/accounts/mybot
 ---
 
 ## Messaging
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Message Types & Endpoints                 │
+└──────────────────────────────────────────────────────────────┘
+
+   📝 Text Message          POST .../message/send
+   ════════════════        { to, message }
+   
+   🖼️  Image                POST .../message/send/image
+   ══════                  multipart/form-data { image, to, caption }
+   
+   🎥 Video                POST .../message/send/video
+   ══════                  multipart/form-data { video, to, caption }
+   
+   🎵 Audio/Voice          POST .../message/send/audio
+   ══════════════          multipart/form-data { audio, to }
+   
+   📄 Document             POST .../message/send/document
+   ═══════════             multipart/form-data { document, to, caption }
+   
+   💬 Reply                POST .../message/reply
+   ═══════                 { to, message, quotedMessageId }
+   
+   👍 React                POST .../message/react
+   ═══════                 { to, messageId, emoji }
+   
+   🗑️  Delete               POST .../message/delete
+   ═══════                 { to, messageId }
+```
 
 ### Send Text Message
 
@@ -676,6 +743,42 @@ curl -X POST http://localhost:3000/accounts/mybot/disconnect
 ---
 
 ## Webhooks
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Webhook Flow                              │
+└──────────────────────────────────────────────────────────────┘
+
+1. Register Webhook                POST /webhooks
+   ════════════════                { url: "https://your-app.com/hook" }
+   
+2. Message Received               WILDCAT receives WhatsApp message
+   ════════════════               
+   
+3. Webhook Delivery               POST to your webhook URL
+   ════════════════               {
+                                    "from": "...",
+                                    "message": "...",
+                                    "messageId": "...",
+                                    "timestamp": ...
+                                  }
+   
+4. Your Handler                   Process & respond
+   ════════════                   (Optional: Send reply via API)
+
+Webhook Payload Example:
+─────────────────────────
+{
+  "from": "919876543210@s.whatsapp.net",
+  "message": "Hello!",
+  "messageId": "3EB0123ABCD456EF",
+  "timestamp": 1730700645123,
+  "accountId": "mybot",
+  "chatId": "919876543210@s.whatsapp.net",
+  "fromMe": false,
+  "type": "text"
+}
+```
 
 ### Register Webhook
 
