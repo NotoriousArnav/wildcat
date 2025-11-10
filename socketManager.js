@@ -65,22 +65,31 @@ class SocketManager {
           this.sockets.delete(accountId);
           socketLog.info('reconnecting_account', { accountId, delaySeconds: 5 });
           try {
-            await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'reconnecting', updatedAt: new Date() } });
-          } catch (_) {}
+            const res1 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'reconnecting', updatedAt: new Date() } });
+            socketLog.info('account_status_updated', { accountId, status: 'reconnecting', modifiedCount: res1.modifiedCount });
+          } catch (err) {
+            socketLog.error('account_status_update_failed', { accountId, status: 'reconnecting', error: err && err.message });
+          }
           setTimeout(() => this.createSocket(accountId, collName), 5000);
         } else {
           socketInfo.status = 'logged_out';
           socketLog.info('account_logged_out', { accountId });
-          try {
-            await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'logged_out', updatedAt: new Date() } });
-          } catch (_) {}
+try {
+             const res2 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'logged_out', updatedAt: new Date() } });
+             socketLog.info('account_status_updated', { accountId, status: 'logged_out', modifiedCount: res2.modifiedCount });
+           } catch (err) {
+             socketLog.error('account_status_update_failed', { accountId, status: 'logged_out', error: err && err.message });
+           }
         }
       } else if (connection === 'open') {
         socketInfo.status = 'connected';
         socketLog.info('account_connected', { accountId });
-        try {
-          await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connected', updatedAt: new Date() } });
-        } catch (_) {}
+try {
+           const res3 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connected', updatedAt: new Date() } });
+           socketLog.info('account_status_updated', { accountId, status: 'connected', modifiedCount: res3.modifiedCount });
+         } catch (err) {
+           socketLog.error('account_status_update_failed', { accountId, status: 'connected', error: err && err.message });
+         }
         if (process.env.ADMIN_NUMBER) {
           try {
             await sock.sendMessage(process.env.ADMIN_NUMBER, { text: `\u2705 Account ${accountId} connected successfully!` });
@@ -89,9 +98,12 @@ class SocketManager {
           }
         }
        } else if (connection === 'connecting') {
-        try {
-          await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connecting', updatedAt: new Date() } });
-        } catch (_) {}
+try {
+           const res4 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connecting', updatedAt: new Date() } });
+           socketLog.info('account_status_updated', { accountId, status: 'connecting', modifiedCount: res4.modifiedCount });
+         } catch (err) {
+           socketLog.error('account_status_update_failed', { accountId, status: 'connecting', error: err && err.message });
+         }
       }
     });
 
