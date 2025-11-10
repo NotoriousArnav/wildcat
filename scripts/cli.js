@@ -1,40 +1,66 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const axios = require('axios');
+const qrcode = require('qrcode-terminal');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 const commands = {
-  ping: () => `curl -s ${BASE_URL}/ping | jq '.'`,
-  
-  accounts: () => `curl -s ${BASE_URL}/accounts | jq '.accounts[] | {id: ._id, name: .name, status: .currentStatus, hasQR: .hasQR}'`,
-  
-  'accounts:list': () => `curl -s ${BASE_URL}/accounts | jq '.'`,
-  
-  'account:status': (accountId) => {
+  ping: async () => {
+    const res = await axios.get(`${BASE_URL}/ping`);
+    console.log(JSON.stringify(res.data, null, 2));
+  },
+
+  accounts: async () => {
+    const res = await axios.get(`${BASE_URL}/accounts`);
+    if (Array.isArray(res.data.accounts)) {
+      res.data.accounts.forEach(acc => {
+        console.log(JSON.stringify({
+          id: acc._id,
+          name: acc.name,
+          status: acc.currentStatus,
+          hasQR: acc.hasQR
+        }, null, 2));
+      });
+    } else {
+      console.log(JSON.stringify(res.data, null, 2));
+    }
+  },
+
+  'accounts:list': async () => {
+    const res = await axios.get(`${BASE_URL}/accounts`);
+    console.log(JSON.stringify(res.data, null, 2));
+  },
+
+  'account:status': async (accountId) => {
     if (!accountId) throw new Error('Usage: npm run account:status <accountId>');
-    return `curl -s ${BASE_URL}/accounts/${accountId}/status | jq '.'`;
+    const res = await axios.get(`${BASE_URL}/accounts/${encodeURIComponent(accountId)}/status`);
+    console.log(JSON.stringify(res.data, null, 2));
   },
   
-  'account:create': (accountId, accountName) => {
+  'account:create': async (accountId, accountName) => {
     if (!accountId) throw new Error('Usage: npm run account:create <accountId> [accountName]');
     const name = accountName || accountId;
-    return `curl -s -X POST ${BASE_URL}/accounts -H 'Content-Type: application/json' -d '{"id":"${accountId}","name":"${name}"}' | jq '.'`;
+    const res = await axios.post(`${BASE_URL}/accounts`, { id: accountId, name });
+    console.log(JSON.stringify(res.data, null, 2));
   },
   
-  'account:delete': (accountId) => {
+  'account:delete': async (accountId) => {
     if (!accountId) throw new Error('Usage: npm run account:delete <accountId>');
-    return `curl -s -X DELETE ${BASE_URL}/accounts/${accountId} | jq '.'`;
+    const res = await axios.delete(`${BASE_URL}/accounts/${encodeURIComponent(accountId)}`);
+    console.log(JSON.stringify(res.data, null, 2));
   },
   
-  'account:connect': (accountId) => {
+  'account:connect': async (accountId) => {
     if (!accountId) throw new Error('Usage: npm run account:connect <accountId>');
-    return `curl -s -X POST ${BASE_URL}/accounts/${accountId}/connect | jq '.'`;
+    const res = await axios.post(`${BASE_URL}/accounts/${encodeURIComponent(accountId)}/connect`);
+    console.log(JSON.stringify(res.data, null, 2));
   },
-  
-  'account:disconnect': (accountId) => {
+
+  'account:disconnect': async (accountId) => {
     if (!accountId) throw new Error('Usage: npm run account:disconnect <accountId>');
-    return `curl -s -X POST ${BASE_URL}/accounts/${accountId}/disconnect | jq '.'`;
+    const res = await axios.post(`${BASE_URL}/accounts/${encodeURIComponent(accountId)}/disconnect`);
+    console.log(JSON.stringify(res.data, null, 2));
   },
   
   // Create an account and show QR in terminal
@@ -117,10 +143,16 @@ if (!command || !commands[command]) {
   process.exit(command ? 1 : 0);
 }
 
-try {
-  const cmd = commands[command](...args);
-  execSync(cmd, { stdio: 'inherit', shell: '/bin/bash' });
-} catch (error) {
-  console.error(error.message);
-  process.exit(1);
-}
+(async () => {
+  try {
+    const result = await commands[command](...args);
+    // For log tailing commands, result will be a string command to execSync
+    if (typeof result === 'string') {
+      const { execSync } = require('child_process');
+      execSync(result, { stdio: 'inherit', shell: '/bin/bash' });
+    }
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+})();
