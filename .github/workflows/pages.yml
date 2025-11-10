@@ -21,12 +21,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential ruby-dev
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
           bundler-cache: true
           cache-version: 0
+
+      - name: Update RubyGems and Bundler
+        run: |
+          gem update --system
+          gem install bundler
 
       - name: Setup Pages
         id: pages
