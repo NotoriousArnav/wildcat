@@ -16,6 +16,7 @@ Complete documentation of all WILDCAT REST API endpoints.
 **Base URL:** `http://localhost:3000` (or your deployed URL)
 
 **Response Format:** All responses are JSON
+
 ```json
 {
   "ok": true,
@@ -69,6 +70,7 @@ Currently **no built-in authentication** (v2.0).
 ⚠️ **Security:** Use behind Nginx or VPN with auth.
 
 ### Request Headers
+
 ```bash
 -H 'Content-Type: application/json'
 ```
@@ -84,6 +86,7 @@ Currently **no built-in authentication** (v2.0).
 | 500 | ❌ Server error |
 
 ### Error Response
+
 ```json
 {
   "ok": false,
@@ -175,23 +178,29 @@ curl http://localhost:3000/accounts/mybot/chats/919876543210@s.whatsapp.net/mess
 ### WhatsApp JID (Java ID)
 
 Individual:
+
 ```
 919876543210@s.whatsapp.net
 ```
 
 Group:
+
 ```
 123456789-1234567890@g.us
 ```
 
 ### Timestamp
+
 Unix timestamp in milliseconds:
+
 ```
 1730700645123
 ```
 
 ### Message ID
+
 Unique identifier:
+
 ```
 3EB0123ABCD456EF
 ```

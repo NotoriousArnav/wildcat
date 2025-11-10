@@ -35,7 +35,7 @@ Find solutions to common problems and answers to frequently asked questions.
    - Most common problems have quick solutions
 
 ### 2. **Review Deployment Guide**
-   - See [Deployment Guide](/docs/guides/deployment/) for environment-specific setup
+   - See [Deployment Guide](/docs/guides/deployment/) for environment‑specific setup
    - Covers VPS, Docker, Heroku, AWS, and home server deployments
 
 ### 3. **Check API Reference**
@@ -68,7 +68,7 @@ Find solutions to common problems and answers to frequently asked questions.
 
 ### Production Issues
 - **High memory usage** → Implement session cleanup, reduce payload sizes
-- **Accounts disconnect periodically** → Add auto-reconnect logic, check network stability
+- **Accounts disconnect periodically** → Add auto‑reconnect logic, check network stability
 - **Database growing too large** → Implement message/log cleanup policies
 
 ---

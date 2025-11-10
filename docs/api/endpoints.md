@@ -134,6 +134,7 @@ curl http://localhost:3000/accounts
 
 | Status | Meaning |
 |--------|---------|
+| `created` | Account created but not yet connected |
 | `connecting` | Waiting for QR code scan |
 | `connected` | Successfully authenticated |
 | `reconnecting` | Attempting to reconnect |

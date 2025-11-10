@@ -20,6 +20,7 @@ Automate WhatsApp messaging using n8n's visual workflow builder.
 ### Setup n8n
 
 1. **Install n8n locally or use n8n.cloud**
+
    ```bash
    # Docker
    docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n
@@ -52,6 +53,7 @@ Automate WhatsApp messaging using n8n's visual workflow builder.
    - URL: `http://your-wildcat-server:3000/accounts/mybot/message/send`
    - Method: POST
    - Body:
+
    ```json
    {
      "to": "{{ $json.from }}",
@@ -480,6 +482,7 @@ const client = axios.create({
 ## Security Best Practices
 
 1. **Use HTTPS only**
+
    ```javascript
    // Good
    url: "https://secure-api.example.com/webhook"
@@ -489,12 +492,14 @@ const client = axios.create({
    ```
 
 2. **Validate webhook source**
+
    ```javascript
    // Verify the webhook came from WILDCAT
    // (Add shared secret validation)
    ```
 
 3. **Never log sensitive data**
+
    ```javascript
    // Bad
    console.log(phoneNumber);  // Never!
@@ -504,6 +509,7 @@ const client = axios.create({
    ```
 
 4. **Use environment variables**
+
    ```javascript
    const WILDCAT_URL = process.env.WILDCAT_URL;
    const API_KEY = process.env.API_KEY;
@@ -514,6 +520,7 @@ const client = axios.create({
 ## Performance Tips
 
 1. **Batch messages**
+
    ```javascript
    // Send multiple messages in parallel
    await Promise.all(
@@ -524,6 +531,7 @@ const client = axios.create({
    ```
 
 2. **Implement retry logic**
+
    ```javascript
    async function sendWithRetry(to, message, maxRetries = 3) {
      for (let i = 0; i < maxRetries; i++) {
@@ -541,6 +549,7 @@ const client = axios.create({
    ```
 
 3. **Cache data**
+
    ```javascript
    // Cache chats for 5 minutes
    const cacheTime = 5 * 60 * 1000;

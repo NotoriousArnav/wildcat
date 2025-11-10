@@ -138,7 +138,7 @@ AUTO_CONNECT_ON_START=false
 
 | Variable | Purpose | Options | Default |
 |----------|---------|---------|---------|
-| `AUTO_CONNECT_ON_START` | Auto-reconnect on server restart | `true`/`false` | `false` |
+| `AUTO_CONNECT_ON_START` | Auto‑reconnect on server restart | `true`/`false` | `false` |
 | `ADMIN_NUMBER` | Send admin notifications | WhatsApp number | (empty) |
 
 ---
@@ -231,7 +231,7 @@ DB_NAME=wildcat
 ### Development Mode
 
 ```bash
-# Auto-reload on file changes (recommended for development)
+# Auto‑reload on file changes (recommended for development)
 npm run dev
 ```
 

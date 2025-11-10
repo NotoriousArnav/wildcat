@@ -95,6 +95,7 @@ sudo nano .env
 ```
 
 Edit `.env`:
+
 ```bash
 HOST=0.0.0.0
 PORT=3000
@@ -115,7 +116,7 @@ pm2 start index.js --name "wildcat"
 # Save PM2 configuration
 pm2 save
 
-# Enable auto-start on reboot
+# Enable auto‑start on reboot
 pm2 startup
 # (Copy and run the command it outputs)
 ```
@@ -131,6 +132,7 @@ sudo nano /etc/nginx/sites-available/wildcat
 ```
 
 Add configuration:
+
 ```nginx
 upstream wildcat {
     server localhost:3000;
@@ -155,6 +157,7 @@ server {
 ```
 
 Enable site:
+
 ```bash
 # Create symlink
 sudo ln -s /etc/nginx/sites-available/wildcat /etc/nginx/sites-enabled/
@@ -173,10 +176,10 @@ sudo systemctl enable nginx
 # Install Certbot
 sudo apt install -y certbot python3-certbot-nginx
 
-# Get certificate (auto-setup)
+# Get certificate (auto‑setup)
 sudo certbot --nginx -d your-domain.com
 
-# Auto-renewal is automatic!
+# Auto‑renewal is automatic!
 
 # Verify
 sudo certbot renew --dry-run
@@ -219,6 +222,7 @@ docker tag wildcat:latest your-registry/wildcat:latest
 ### 2. Run with Docker Compose
 
 Create `docker-compose.yml`:
+
 ```yaml
 version: '3.8'
 
@@ -256,6 +260,7 @@ volumes:
 ```
 
 Run:
+
 ```bash
 # Start services
 docker-compose up -d
@@ -270,6 +275,7 @@ docker-compose down
 ### 3. Deploy to Cloud
 
 **Docker Hub:**
+
 ```bash
 # Login
 docker login
@@ -375,12 +381,14 @@ ssh -i /path/to/key.pem ubuntu@your-instance-ip
 Before going live, verify:
 
 - [ ] **Environment variables set correctly**
+
   ```bash
   echo $MONGO_URL
   echo $NODE_ENV  # Should be "production"
   ```
 
 - [ ] **HTTPS enabled** (Let's Encrypt or AWS Certificate Manager)
+
   ```bash
   curl https://your-domain.com/ping
   ```
@@ -391,8 +399,9 @@ Before going live, verify:
   - Papertrail (logs)
 
 - [ ] **Backups configured**
+
   ```bash
-  # MongoDB Atlas auto-backups enabled
+  # MongoDB Atlas auto‑backups enabled
   # Or custom backup script
   ```
 

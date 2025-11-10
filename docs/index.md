@@ -19,7 +19,7 @@ Complete guides for installing, configuring, and using WILDCAT.
 | Guide | Time | Learn |
 |-------|------|-------|
 | **[5-Minute Quickstart](/docs/getting-started/quickstart/)** | 5 min | Get WILDCAT running instantly |
-| **[Detailed Installation Guide](/docs/getting-started/installation/)** | 15 min | Step-by-step setup with all options |
+| **[Detailed Installation Guide](/docs/getting-started/installation/)** | 15 min | Step‑by‑step setup with all options |
 
 ### 🔌 Building with WILDCAT
 
@@ -70,7 +70,7 @@ Complete guides for installing, configuring, and using WILDCAT.
 Guide new users through setup and first steps.
 
 - **[Quickstart](/docs/getting-started/quickstart/)** - Get WILDCAT running in 5 minutes
-- **[Installation](/docs/getting-started/installation/)** - Complete step-by-step installation with all options
+- **[Installation](/docs/getting-started/installation/)** - Complete step‑by‑step installation with all options
 
 ### [API Reference](/docs/api/endpoints/)
 Complete reference for all REST endpoints.
@@ -199,7 +199,7 @@ See [Integration Examples](/docs/guides/integration-examples/):
 ## 📊 Documentation Stats
 
 - **Total Pages:** 12 comprehensive documents
-- **Code Examples:** 100+ copy-paste ready commands
+- **Code Examples:** 100+ copy‑paste ready commands
 - **Endpoints Documented:** 20+ REST API endpoints
 - **Deployment Options:** 5 (VPS, Docker, Heroku, AWS, home server)
 - **Integration Examples:** 4 (n8n, Zapier, Node.js, Python)

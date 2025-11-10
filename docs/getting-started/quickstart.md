@@ -19,6 +19,7 @@ Get WILDCAT up and running in just 5 minutes with this streamlined setup.
 - **WhatsApp Account** (with active WhatsApp Web access)
 
 **Verify you have Node.js 18+:**
+
 ```bash
 node --version  # Should show v18.x.x or higher
 ```
@@ -57,6 +58,7 @@ DB_NAME=wildcat
 ```
 
 **Using MongoDB Atlas?**
+
 ```bash
 MONGO_URL=mongodb+srv://username:password@cluster0.mongodb.net/?retryWrites=true&w=majority
 DB_NAME=wildcat
@@ -67,7 +69,7 @@ DB_NAME=wildcat
 ## 3. Start Server (30 seconds)
 
 ```bash
-# Development mode (auto-reload on file changes)
+# Development mode (auto‑reload on file changes)
 npm run dev
 
 # Production mode
@@ -75,6 +77,7 @@ npm start
 ```
 
 You'll see output like:
+
 ```
 [2025-11-08] ✅ Server running on http://localhost:3000
 [2025-11-08] ✅ Database connected to MongoDB
@@ -97,6 +100,7 @@ curl -X POST http://localhost:3000/accounts \
 ```
 
 **Response:**
+
 ```json
 {
   "ok": true,
@@ -111,6 +115,7 @@ curl -X POST http://localhost:3000/accounts \
 ```
 
 **Watch for QR Code** - In the server terminal, you'll see:
+
 ```
 === QR Code for account: mybot ===
 ▄▄▄▄▄▄▄ ▀█▀▀ ▀▄▄ ▀ ▀▄▀ ▄▄▄▄▄▄▄
@@ -148,6 +153,7 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send \
 Replace `1234567890` with a real WhatsApp number (without country code prefix, just digits):
 
 **Example for Indian number +91 98765 43210:**
+
 ```json
 {
   "to": "919876543210@s.whatsapp.net",
@@ -156,6 +162,7 @@ Replace `1234567890` with a real WhatsApp number (without country code prefix, j
 ```
 
 **Response:**
+
 ```json
 {
   "ok": true,
@@ -187,30 +194,35 @@ You now have a working WILDCAT instance. Here's what's next:
 ## ⚡ Quick API Examples
 
 ### Check Server Health
+
 ```bash
 curl http://localhost:3000/ping
 # {"ok":true,"pong":true,"time":"2025-11-08T12:00:00.000Z"}
 ```
 
 ### List All Accounts
+
 ```bash
 curl http://localhost:3000/accounts
 # {"ok":true,"accounts":[...]}
 ```
 
 ### Get Account Status
+
 ```bash
 curl http://localhost:3000/accounts/mybot
 # {"ok":true,"account":{...,"currentStatus":"connected"}}
 ```
 
 ### Disconnect Account
+
 ```bash
 curl -X POST http://localhost:3000/accounts/mybot/disconnect
 # {"ok":true,"message":"Account mybot disconnected"}
 ```
 
 ### Delete Account
+
 ```bash
 curl -X DELETE http://localhost:3000/accounts/mybot
 # {"ok":true,"message":"Account mybot deleted"}
@@ -236,6 +248,7 @@ curl -X DELETE http://localhost:3000/accounts/mybot
 - Check WhatsApp account isn't rate limited (wait a minute)
 
 ### Port Already in Use?
+
 ```bash
 # Change port in .env
 PORT=3001

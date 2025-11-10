@@ -46,6 +46,7 @@ nvm use 18
 **A:** Yes. You have two options:
 
 **Option 1: Local MongoDB**
+
 ```bash
 # macOS
 brew install mongodb-community
@@ -62,6 +63,7 @@ sudo systemctl start mongod
 2. Create free tier cluster
 3. Get connection string
 4. Add to `.env`:
+
    ```bash
    MONGO_URL=mongodb+srv://user:password@cluster0.mongodb.net
    ```
@@ -75,6 +77,7 @@ sudo systemctl start mongod
 - **MongoDB:** 27017 (if running locally)
 
 To use different port:
+
 ```bash
 # In .env or terminal
 PORT=3001
@@ -90,6 +93,7 @@ npm run dev
 **A:** Check these:
 
 1. **Is MongoDB running?**
+
    ```bash
    # Test connection
    mongosh
@@ -106,6 +110,7 @@ npm run dev
    - Add your IP address (or 0.0.0.0 for testing)
 
 4. **Check credentials (Atlas)**
+
    ```bash
    # Correct format:
    mongodb+srv://username:password@cluster0.mongodb.net/?retryWrites=true&w=majority
@@ -118,12 +123,14 @@ npm run dev
 **A:** Try these solutions:
 
 1. **Check server is running**
+
    ```bash
    # See "Server running on http://localhost:3000"
    npm run dev
    ```
 
 2. **Create account to generate QR**
+
    ```bash
    curl -X POST http://localhost:3000/accounts \
      -H 'Content-Type: application/json' \
@@ -145,16 +152,18 @@ npm run dev
 
 ### Q: Account keeps disconnecting
 
-**A:** This is usually temporary. WILDCAT auto-reconnects after 5 seconds.
+**A:** This is usually temporary. WILDCAT auto‑reconnects after 5 seconds.
 
 **If it keeps happening:**
 
 1. **Check internet connection**
+
    ```bash
    curl https://www.whatsapp.com
    ```
 
 2. **Restart the account**
+
    ```bash
    # Disconnect
    curl -X POST http://localhost:3000/accounts/:accountId/disconnect
@@ -164,6 +173,7 @@ npm run dev
    ```
 
 3. **Check server logs for errors**
+
    ```bash
    # Look for ERROR or disconnect messages in console
    ```
@@ -192,6 +202,7 @@ curl -X POST http://localhost:3000/accounts \
 ```
 
 Or delete the existing account:
+
 ```bash
 curl -X DELETE http://localhost:3000/accounts/mybot
 ```
@@ -205,12 +216,14 @@ curl -X DELETE http://localhost:3000/accounts/mybot
 **A:** Check in this order:
 
 1. **Is account connected?**
+
    ```bash
    curl http://localhost:3000/accounts/:accountId
    # Check "currentStatus": "connected"
    ```
 
 2. **Correct WhatsApp format?**
+
    ```bash
    # Correct: 919876543210@s.whatsapp.net
    # Wrong: +919876543210
@@ -231,6 +244,7 @@ curl -X DELETE http://localhost:3000/accounts/mybot
    - Check: "Too many requests" or 429 error
 
 4. **Is account logged out?**
+
    ```bash
    # Status shows "logged_out"?
    # Reconnect:
@@ -266,6 +280,7 @@ curl -X DELETE http://localhost:3000/accounts/mybot
 **A:** Yes! Supported media types:
 
 **Images** (JPG, PNG, GIF)
+
 ```bash
 curl -X POST http://localhost:3000/accounts/mybot/message/send/image \
   -F "image=@/path/to/photo.jpg" \
@@ -274,6 +289,7 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send/image \
 ```
 
 **Videos** (MP4, WebM)
+
 ```bash
 curl -X POST http://localhost:3000/accounts/mybot/message/send/video \
   -F "video=@/path/to/video.mp4" \
@@ -281,6 +297,7 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send/video \
 ```
 
 **Audio** (MP3, M4A, WAV, OGG)
+
 ```bash
 curl -X POST http://localhost:3000/accounts/mybot/message/send/audio \
   -F "audio=@/path/to/audio.mp3" \
@@ -288,6 +305,7 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send/audio \
 ```
 
 **Documents** (PDF, DOCX, XLS, etc.)
+
 ```bash
 curl -X POST http://localhost:3000/accounts/mybot/message/send/document \
   -F "document=@/path/to/document.pdf" \
@@ -305,12 +323,14 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send/document \
 **A:** Try these optimizations:
 
 1. **Reduce number of concurrent accounts**
+
    ```bash
    # Delete unused accounts
    curl -X DELETE http://localhost:3000/accounts/unused-account
    ```
 
 2. **Increase Node.js heap size**
+
    ```bash
    NODE_OPTIONS=--max-old-space-size=2048 npm start
    ```
@@ -367,6 +387,7 @@ For now, use single server deployment.
 **A:** ⚠️ **Not recommended (v2).** Instead:
 
 1. **Run behind Nginx** (add auth)
+
    ```nginx
    location / {
      auth_basic "Restricted";
@@ -376,6 +397,7 @@ For now, use single server deployment.
    ```
 
 2. **Use VPN/SSH tunnel**
+
    ```bash
    ssh -L 3000:localhost:3000 user@server
    ```
@@ -473,6 +495,7 @@ For now, check server output for:
 **A:** Not in v2.0. Coming in v3.0.
 
 **Workaround:** Create group manually, then:
+
 ```bash
 # Get group JID
 curl http://localhost:3000/accounts/mybot/chats

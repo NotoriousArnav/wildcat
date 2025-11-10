@@ -107,7 +107,7 @@ npm start
 
 ### 1. Customer Support Bot
 
-Receive WhatsApp messages → Auto-reply to FAQs → Create support tickets for complex issues
+Receive WhatsApp messages → Auto‑reply to FAQs → Create support tickets for complex issues
 
 **Tools:** WILDCAT + n8n + Your CRM
 

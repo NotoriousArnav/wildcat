@@ -107,6 +107,7 @@ Authentication: None (development). Add your own auth when exposing publicly.
   - `messageId` (optional): Filter by specific message ID
   - `accountId` (optional): Filter by account ID
   - `chatId` (optional): Filter by chat ID
+
 - **Response 200:**
 ```json
 {
@@ -215,6 +216,7 @@ Authentication: None (development). Add your own auth when exposing publicly.
 ## Examples
 
 ### Create and Connect an Account
+
 ```bash
 # 1. Create account
 curl -X POST http://localhost:3000/accounts \
@@ -232,6 +234,7 @@ curl http://localhost:3000/accounts/mybusiness/status
 ```
 
 ### Send a Message
+
 ```bash
 # Send text message
 curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
@@ -261,6 +264,7 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
 ```
 
 ### Send Media Messages
+
 ```bash
 # Send image
 curl -X POST http://localhost:3000/accounts/mybusiness/message/send/image \
@@ -288,6 +292,7 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/send/document \
 ```
 
 ### React and Delete Messages
+
 ```bash
 # React to message
 curl -X POST http://localhost:3000/accounts/mybusiness/message/react \
@@ -308,6 +313,7 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/delete \
 ```
 
 ### Retrieve Messages and Media
+
 ```bash
 # Get specific message
 curl http://localhost:3000/accounts/mybusiness/messages/3EB0A12345678901
@@ -323,11 +329,13 @@ curl http://localhost:3000/accounts/mybusiness/messages/3EB0A12345678901/media -
 ```
 
 ### List All Accounts
+
 ```bash
 curl http://localhost:3000/accounts
 ```
 
 ### Register Webhook
+
 ```bash
 curl -X POST http://localhost:3000/webhooks \
   -H 'Content-Type: application/json' \
