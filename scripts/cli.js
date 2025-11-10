@@ -74,7 +74,7 @@ exit 1
     if (!accountId || !to || !message) {
       throw new Error('Usage: npm run message:send <accountId> <to> <message>');
     }
-    const escapedMessage = message.replace(/"/g, '\\"');
+    const escapedMessage = JSON.stringify(message).slice(1, -1);
     return `curl -s -X POST ${BASE_URL}/accounts/${accountId}/message/send -H 'Content-Type: application/json' -d '{"to":"${to}","message":"${escapedMessage}"}' | jq '.'`;
   },
   
