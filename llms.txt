@@ -1,0 +1,41 @@
+WILDCAT - WhatsApp REST API
+
+WILDCAT is an open-source, enterprise-grade WhatsApp REST API for Node.js, designed for automation, bots, and integration with external services. It provides a clean HTTP interface, multi-account support, real-time webhooks, and robust media handling.
+
+Key Features:
+- Multi-account WhatsApp management
+- Send/receive messages, media, reactions, and statuses
+- Real-time webhooks for automation (n8n, Zapier, etc.)
+- GridFS media storage with direct-access endpoints
+- REST API with 20+ endpoints
+- Docker support for easy deployment
+- Structured logging (HTTP, Baileys, app logs)
+- Quick setup (5 minutes)
+
+Architecture Overview:
+- Express.js REST API server
+- Baileys library for WhatsApp Web protocol
+- MongoDB for session and media storage
+- WebSocket QR authentication
+- Integration with external automation tools
+
+Quick Start:
+1. Clone: git clone https://github.com/NotoriousArnav/wildcat.git
+2. Install: npm ci
+3. Configure: Copy .env.example to .env and set MONGO_URL, DB_NAME
+4. Start: npm start
+5. Send message: Use /accounts/{id}/message/send endpoint
+
+Important Notices:
+- Unofficial WhatsApp integration (use at your own risk)
+- Subject to WhatsApp rate limits and ban risk
+- No built-in authentication—do not expose to public internet
+
+Documentation Links:
+- Home: https://notoriousarnav.github.io/wildcat/
+- Quickstart: https://notoriousarnav.github.io/wildcat/docs/getting-started/quickstart
+- API Reference: https://notoriousarnav.github.io/wildcat/docs/api/endpoints
+- Architecture: https://notoriousarnav.github.io/wildcat/docs/ARCHITECTURE
+- Deployment Guide: https://notoriousarnav.github.io/wildcat/docs/guides/deployment
+
+License: GPL-3.0
