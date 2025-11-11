@@ -196,7 +196,7 @@ function globalRateLimiter() {
   const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000; // 15 minutes
   const maxRequests = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100;
 
-  const limiter = rateLimit({
+  const config = {
     windowMs,
     max: maxRequests,
     standardHeaders: false, // Disable default headers
@@ -212,16 +212,24 @@ function globalRateLimiter() {
         error: 'Too many requests. Please try again later.',
       });
     },
-    keyGenerator: (req) => {
-      // Use user ID if authenticated, otherwise use IP
-      if (req.auth && req.auth.userId) {
-        return `user:${req.auth.userId}`;
-      }
-      return req.ip;
-    },
-  });
+  };
 
-  return limiter;
+  // Use default key generator (based on IP) unless user is authenticated
+  if (!isEnabled) {
+    return rateLimit(config);
+  }
+
+  // When enabled, add custom key generator for authenticated users
+  config.keyGenerator = (req) => {
+    // Use user ID if authenticated, otherwise use default IP-based key
+    if (req.auth && req.auth.userId) {
+      return `user:${req.auth.userId}`;
+    }
+    // Return empty string to use default behavior for unauthenticated users
+    return undefined;
+  };
+
+  return rateLimit(config);
 }
 
 /**
@@ -237,7 +245,7 @@ function endpointRateLimiter(options = {}) {
   const windowMs = options.windowMs || 60000; // 1 minute
   const max = options.max || 20;
 
-  const limiter = rateLimit({
+  const config = {
     windowMs,
     max,
     standardHeaders: false,
@@ -253,15 +261,19 @@ function endpointRateLimiter(options = {}) {
         error: 'Too many requests to this endpoint. Please try again later.',
       });
     },
-    keyGenerator: (req) => {
+  };
+
+  // Add custom key generator only if rate limiting is enabled
+  if (process.env.RATE_LIMIT_ENABLED === 'true') {
+    config.keyGenerator = (req) => {
       if (req.auth && req.auth.userId) {
         return `user:${req.auth.userId}:${req.path}`;
       }
-      return `${req.ip}:${req.path}`;
-    },
-  });
+      return undefined;
+    };
+  }
 
-  return limiter;
+  return rateLimit(config);
 }
 
 module.exports = {
