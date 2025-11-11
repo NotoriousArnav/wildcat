@@ -4,13 +4,17 @@
   "description": "WhatsApp Integration Layer for Data Connectivity and Transfer",
   "main": "index.js",
   "scripts": {
-    "countLines": "cat ./*.js | wc -l",
+    "build": "tsc",
     "dev": "nodemon index.js",
+    "dev:ts": "tsx watch src/index.ts",
     "start": "node index.js",
+    "start:ts": "node --loader tsx dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "ping": "node scripts/cli.js ping"
+    "ping": "node scripts/cli.js ping",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix"
   },
   "repository": {
     "type": "git",
@@ -36,10 +40,13 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.11",
     "@types/node": "^20",
     "jest": "^29.7.0",
     "knip": "^5.69.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "tsx": "^4.7.0"
   },
   "overrides": {
     "glob": "^10.4.5"

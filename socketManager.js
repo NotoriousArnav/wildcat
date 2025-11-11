@@ -52,12 +52,11 @@ class SocketManager {
       const accountsCol = this.db.collection('accounts');
 
       if (qr) {
-        // Keep terminal friendly QR while also structured log
-        console.log(`\n=== QR Code for account: ${accountId} ===`);
-        qrcode.generate(qr, { small: true });
-        console.log('=== Scan with WhatsApp to connect ===\n');
-        socketLog.info('qr_generated', { accountId });
-      }
+         // Keep terminal friendly QR while also structured log
+         socketLog.info('qr_code_display', { accountId, message: `QR Code for account: ${accountId}` });
+         qrcode.generate(qr, { small: true });
+         socketLog.info('qr_scan_prompt', { accountId });
+       }
 
       if (connection === 'close') {
         const loggedOut = lastDisconnect?.error?.output?.statusCode === DisconnectReason.loggedOut;
