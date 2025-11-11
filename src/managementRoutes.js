@@ -1,8 +1,8 @@
 const express = require('express');
 const { GridFSBucket, ObjectId } = require('mongodb');
 const { appLogger } = require('./logger');
-const { webhookUrlValidationMiddleware } = require('./src/middleware/webhookSecurityMiddleware');
-const { validateRequest, webhookSchema } = require('./src/validators/validationSchemas');
+const { webhookUrlValidationMiddleware } = require('./middleware/webhookSecurityMiddleware');
+const { validateRequest, webhookSchema } = require('./validators/validationSchemas');
 
 /**
  * Builds and returns an Express router exposing management endpoints for accounts, media, webhooks, messages, and health checks.
