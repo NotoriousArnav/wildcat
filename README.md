@@ -64,6 +64,41 @@ Perfect for **chatbots**, **CRM integrations**, **marketing automation**, and **
 
 ---
 
+## 🚧 v3.0 Modernization In Progress
+
+**Current Status:** Code modernization and restructuring is actively happening in the `feature/phase1-modernization` branch.
+
+### What's Being Updated
+
+We're currently working on a major reorganization to improve code quality, maintainability, and security:
+
+- ✅ **Directory Structure** - Reorganizing codebase into structured `src/` directory
+- ✅ **Code Organization** - Middleware, validators, and types in dedicated subdirectories  
+- ✅ **Security Enhancements** - Authentication middleware, webhook validation, input validation
+- ✅ **Structured Logging** - Unified logging system across all modules
+- 🔄 **Documentation** - Comprehensive guides and API reference updates
+
+### Timeline
+
+**Phase 1 (Current - Q4 2024):**
+- Code reorganization into modular structure
+- Enhanced security middleware
+- Comprehensive testing framework
+
+**Phase 2 (Q1 2025):**
+- HTTP Authentication (API keys, JWT)
+- Rate limiting per account/IP
+- Advanced input validation
+
+**Phase 3 (Q2 2025):**
+- Additional features and optimizations
+- Performance improvements
+- Production readiness
+
+To see the latest improvements, check the [`feature/phase1-modernization`](../../tree/feature/phase1-modernization) branch. We welcome contributions and feedback!
+
+---
+
 ## 🚀 Quick Start
 
 ### 1️⃣ Prerequisites
