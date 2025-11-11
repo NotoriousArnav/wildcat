@@ -79,7 +79,7 @@ function createManagementRoutes(accountManager, socketManager, app) {
           const db = await connectToDB();
           await db.collection(collectionName).drop();
           log.info('collection_dropped', { collectionName });
-        } catch (_) {
+        } catch (_) { // eslint-disable-line no-unused-vars
           log.info('collection_drop_not_required', { collectionName });
         }
       }
@@ -95,35 +95,35 @@ function createManagementRoutes(accountManager, socketManager, app) {
     res.status(200).json({ ok: true, pong: true, time: new Date().toISOString() });
   });
 
-   router.post('/webhooks',
-     validateRequest(webhookSchema),
-     webhookUrlValidationMiddleware({ bodyField: 'webhookUrl' }),
-     async (req, res) => {
-       try {
-         const { webhookUrl } = req.body || {};
-         if (!webhookUrl || typeof webhookUrl !== 'string') return res.status(400).json({ ok: false, error: 'webhookUrl is required and must be a string' });
-         let parsed;
-         try {
-           parsed = new URL(webhookUrl);
-         } catch (_) {
-           return res.status(400).json({ ok: false, error: 'invalid URL' });
-         }
-         if (!/^https?:$/.test(parsed.protocol)) return res.status(400).json({ ok: false, error: 'only http/https URLs are allowed' });
-         const { connectToDB } = require('./db');
-         const db = await connectToDB();
-         const collection = db.collection('webhooks');
-         const now = new Date();
-         const result = await collection.updateOne({ webhookUrl }, { $setOnInsert: { webhookUrl, createdAt: now } }, { upsert: true });
-         const created = result && (result.upsertedId != null || result.upsertedCount === 1);
-         const redactedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}`;
-         log.info('webhook_registered', { url: redactedUrl, created });
-         return res.status(created ? 201 : 200).json({ ok: true, url: webhookUrl, created });
-       } catch (err) {
-         log.error('webhook_register_error', { error: err.message });
-         return res.status(500).json({ ok: false, error: 'internal_error' });
-       }
-     }
-   );
+  router.post('/webhooks',
+    validateRequest(webhookSchema),
+    webhookUrlValidationMiddleware({ bodyField: 'webhookUrl' }),
+    async (req, res) => {
+      try {
+        const { webhookUrl } = req.body || {};
+        if (!webhookUrl || typeof webhookUrl !== 'string') return res.status(400).json({ ok: false, error: 'webhookUrl is required and must be a string' });
+        let parsed;
+        try {
+          parsed = new URL(webhookUrl);
+        } catch (_) { // eslint-disable-line no-unused-vars
+          return res.status(400).json({ ok: false, error: 'invalid URL' });
+        }
+        if (!/^https?:$/.test(parsed.protocol)) return res.status(400).json({ ok: false, error: 'only http/https URLs are allowed' });
+        const { connectToDB } = require('./db');
+        const db = await connectToDB();
+        const collection = db.collection('webhooks');
+        const now = new Date();
+        const result = await collection.updateOne({ webhookUrl }, { $setOnInsert: { webhookUrl, createdAt: now } }, { upsert: true });
+        const created = result && (result.upsertedId != null || result.upsertedCount === 1);
+        const redactedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}`;
+        log.info('webhook_registered', { url: redactedUrl, created });
+        return res.status(created ? 201 : 200).json({ ok: true, url: webhookUrl, created });
+      } catch (err) {
+        log.error('webhook_register_error', { error: err.message });
+        return res.status(500).json({ ok: false, error: 'internal_error' });
+      }
+    },
+  );
 
   router.get('/messages', async (req, res) => {
     try {

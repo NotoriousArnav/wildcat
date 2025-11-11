@@ -64,7 +64,9 @@ module.exports = {
         const { url } = req.body || {};
         if (!url || typeof url !== 'string') return res.status(400).json({ ok: false, error: 'url is required and must be a string' });
         let parsed;
-        try { parsed = new URL(url); } catch (_) { return res.status(400).json({ ok: false, error: 'invalid URL' }); }
+        try { parsed = new URL(url); } catch (_) { // eslint-disable-line no-unused-vars
+          return res.status(400).json({ ok: false, error: 'invalid URL' });
+        }
         if (!/^https?:$/.test(parsed.protocol)) return res.status(400).json({ ok: false, error: 'only http/https URLs are allowed' });
         const { connectToDB } = require('./db');
         const db = await connectToDB();

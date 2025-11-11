@@ -58,7 +58,7 @@ async function restoreAccounts(accountManager, socketManager, app) {
           const collName = account.collectionName || `auth_${accountId}`;
           const credsDoc = await socketManager.db.collection(collName).findOne({ _id: 'creds' });
           shouldAutoConnect = !!credsDoc;
-        } catch (probeErr) {
+        } catch (_) { // eslint-disable-line no-unused-vars
           // ignore and leave shouldAutoConnect as false
         }
       }

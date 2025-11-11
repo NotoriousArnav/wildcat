@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const { appLogger, httpLogger, wireSocketLogging } = require('../src/logger');
 
 // Mock fs module

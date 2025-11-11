@@ -79,7 +79,7 @@ describe('SocketManager', () => {
       Promise.resolve({
         state: { creds: {} },
         saveCreds: jest.fn(),
-      })
+      }),
     );
 
     socketManager = new SocketManager();

@@ -193,7 +193,7 @@ describe('Index Module', () => {
       
       expect(mockAccountManager.updateAccountStatus).toHaveBeenCalledWith(
         accountId,
-        'not_started'
+        'not_started',
       );
     });
   });

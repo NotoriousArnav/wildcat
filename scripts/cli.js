@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const axios = require('axios');
-const qrcode = require('qrcode-terminal');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 

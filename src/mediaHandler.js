@@ -1,7 +1,6 @@
 const { GridFSBucket } = require('mongodb');
 const { downloadMediaMessage } = require('@whiskeysockets/baileys');
 const { appLogger } = require('./logger');
-const path = require('path');
 const { Readable } = require('stream');
 
 const logger = appLogger('mediaHandler');

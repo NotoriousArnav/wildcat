@@ -1,8 +1,6 @@
 const { createManagementRoutes } = require('../src/managementRoutes');
-const { createAccountRouter } = require('../src/accountRouter');
 const { appLogger } = require('../src/logger');
 const { connectToDB } = require('../src/db');
-const { GridFSBucket, ObjectId } = require('mongodb');
 
 jest.mock('express');
 jest.mock('../src/accountRouter');
@@ -134,7 +132,7 @@ describe('Management Routes', () => {
               currentStatus: 'connected',
             }),
           ]),
-        })
+        }),
       );
     });
 
@@ -219,7 +217,7 @@ describe('Management Routes', () => {
       expect(mockAccountManager.deleteAccount).toHaveBeenCalledWith('acc1');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ ok: true })
+        expect.objectContaining({ ok: true }),
       );
     });
 
@@ -273,7 +271,7 @@ describe('Management Routes', () => {
         expect.objectContaining({
           ok: true,
           messages: mockMessages,
-        })
+        }),
       );
     });
 

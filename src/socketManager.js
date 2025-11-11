@@ -52,11 +52,11 @@ class SocketManager {
       const accountsCol = this.db.collection('accounts');
 
       if (qr) {
-         // Keep terminal friendly QR while also structured log
-         socketLog.info('qr_code_display', { accountId, message: `QR Code for account: ${accountId}` });
-         qrcode.generate(qr, { small: true });
-         socketLog.info('qr_scan_prompt', { accountId });
-       }
+        // Keep terminal friendly QR while also structured log
+        socketLog.info('qr_code_display', { accountId, message: `QR Code for account: ${accountId}` });
+        qrcode.generate(qr, { small: true });
+        socketLog.info('qr_scan_prompt', { accountId });
+      }
 
       if (connection === 'close') {
         const loggedOut = lastDisconnect?.error?.output?.statusCode === DisconnectReason.loggedOut;
@@ -194,7 +194,8 @@ class SocketManager {
               try {
                 const parsed = new URL(webhook.url);
                 redactedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}`;
-              } catch (_) {}
+              } catch (_) { // eslint-disable-line no-unused-vars
+              }
               socketLog.error('webhook_send_failed', { accountId, webhook: redactedUrl, error: result.error });
             }
           }

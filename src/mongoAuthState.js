@@ -112,14 +112,15 @@ module.exports = useMongoDBAuthState = async (collection) => {
     try {
       const data = JSON.stringify(await collection.findOne({ _id: id }));
       return JSON.parse(data, BufferJSON.reviver);
-    } catch (error) {
+    } catch (error) { // eslint-disable-line no-unused-vars
       return null;
     }
   };
   const removeData = async (id) => {
     try {
       await collection.deleteOne({ _id: id });
-    } catch (_a) {}
+    } catch (_a) { // eslint-disable-line no-unused-vars
+    }
   };
   const creds = (await readData('creds')) || (0, initAuthCreds)();
   return {

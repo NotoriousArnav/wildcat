@@ -6,7 +6,7 @@ const LOG_DIR = path.join(__dirname, '.logs');
 function ensureLogsDir() {
   try {
     if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
-  } catch (e) {
+  } catch (_) { // eslint-disable-line no-unused-vars
     // If logs dir cannot be created, we silently ignore; console fallback remains.
   }
 }
@@ -31,7 +31,7 @@ function writeLine(fileName, level, message, meta) {
   });
   try {
     getStream(fileName).write(line + '\n');
-  } catch (_) {
+  } catch (_) { // eslint-disable-line no-unused-vars
     // fallback to stdout
     try { console.log(line); } catch {} // no-op
   }
