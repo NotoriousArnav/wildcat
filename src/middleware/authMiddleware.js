@@ -1,5 +1,5 @@
 const rateLimit = require('express-rate-limit');
-const { appLogger } = require('./logger');
+const { appLogger } = require('../../logger');
 
 const log = appLogger('auth');
 

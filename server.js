@@ -4,7 +4,7 @@ const express = require('express');
 const helmet = require('helmet');
 
 const { httpLogger, appLogger } = require('./logger');
-const { basicAuthMiddleware, apiKeyMiddleware, globalRateLimiter } = require('./authMiddleware');
+const { basicAuthMiddleware, apiKeyMiddleware, globalRateLimiter } = require('./src/middleware/authMiddleware');
 
 const constructApp = function () {
   const app = express();

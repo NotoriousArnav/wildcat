@@ -3,9 +3,9 @@
  * Tests for authentication, rate limiting, validation, and webhook security
  */
 
-const { basicAuthMiddleware, apiKeyMiddleware, globalRateLimiter, endpointRateLimiter } = require('../authMiddleware');
-const { validateRequest, sendMessageSchema, webhookSchema } = require('../validationSchemas');
-const { validateWebhookUrl } = require('../webhookSecurityMiddleware');
+const { basicAuthMiddleware, apiKeyMiddleware, globalRateLimiter, endpointRateLimiter } = require('../src/middleware/authMiddleware');
+const { validateRequest, sendMessageSchema, webhookSchema } = require('../src/validators/validationSchemas');
+const { validateWebhookUrl } = require('../src/middleware/webhookSecurityMiddleware');
 
 describe('Authentication Middleware', () => {
   describe('basicAuthMiddleware', () => {

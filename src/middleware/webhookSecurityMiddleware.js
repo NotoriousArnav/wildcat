@@ -1,4 +1,4 @@
-const { appLogger } = require('./logger');
+const { appLogger } = require('../../logger');
 
 const log = appLogger('webhook');
 
