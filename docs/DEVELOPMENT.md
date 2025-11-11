@@ -64,7 +64,7 @@ docs: update API reference
 - **Formatting:** Consistent indentation (2 spaces)
 - **Naming:** camelCase for variables/functions, PascalCase for classes
 - **Error Handling:** Use try/catch, return structured error responses
-- **Logging:** Use the provided logger utilities
+- **Logging:** Use the provided logger utilities from `src/logger.js`
 
 ### API Design
 
@@ -195,11 +195,11 @@ NODE_ENV=development
 
 ```bash
 # Memory usage
-node --inspect index.js
+node --inspect src/index.js
 
 # Performance monitoring
 npm install -g clinic
-clinic doctor -- node index.js
+clinic doctor -- node src/index.js
 ```
 
 ## Security

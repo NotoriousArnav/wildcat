@@ -155,6 +155,7 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send \
 - **Config:** See `eslint.config.js` in the project root.
 - **CI:** Linting is enforced in GitHub Actions.
 - **Style:** 2-space indent, single quotes, trailing commas, semicolons, CommonJS modules.
+- **Core Code:** Application code is organized in the `src/` directory with structured subdirectories for middleware, validators, and types.
 
 <table>
   <tr>

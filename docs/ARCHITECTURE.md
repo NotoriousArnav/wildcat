@@ -37,14 +37,19 @@ This document describes the high-level architecture of the Wildcat WhatsApp inte
 
 ### Key Files
 
-- **`index.js`** - Application entry point, initializes managers and starts server
-- **`server.js`** - Express app construction and server startup
-- **`managementRoutes.js`** - Global routes (accounts, webhooks, media)
-- **`accountRouter.js`** - Per-account routes (messages, status)
-- **`socketManager.js`** - WhatsApp socket lifecycle management
-- **`accountManager.js`** - Account CRUD operations
-- **`mediaHandler.js`** - Media download/upload to GridFS
-- **`logger.js`** - Structured logging utilities
+- **`src/index.js`** - Application entry point, initializes managers and starts server
+- **`src/server.js`** - Express app construction and server startup
+- **`src/managementRoutes.js`** - Global routes (accounts, webhooks, media)
+- **`src/accountRouter.js`** - Per-account routes (messages, status)
+- **`src/socketManager.js`** - WhatsApp socket lifecycle management
+- **`src/accountManager.js`** - Account CRUD operations
+- **`src/mediaHandler.js`** - Media download/upload to GridFS
+- **`src/logger.js`** - Structured logging utilities
+- **`src/middleware/authMiddleware.js`** - HTTP authentication middleware
+- **`src/middleware/webhookSecurityMiddleware.js`** - Webhook request validation
+- **`src/validators/validationSchemas.js`** - Input validation schemas
+- **`src/db.js`** - MongoDB connection management
+- **`src/mongoAuthState.js`** - WhatsApp auth state persistence
 
 ## Data Flow
 
