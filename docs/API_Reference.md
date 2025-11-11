@@ -8,13 +8,101 @@ parent: Documentation
 
 # Wildcat API Reference
 
-Version: 2.0.0 - Multi-Account Support
+Version: 3.0.0 - Security & Multi-Account Support
 
 Base URL: `http://HOST:PORT` (defaults: `HOST=0.0.0.0`, `PORT=3000`)
 
 Content-Type: `application/json`
 
-Authentication: None (development). Add your own auth when exposing publicly.
+---
+
+## Security (Phase 2)
+
+The API supports multiple authentication and security mechanisms to protect your data and prevent abuse:
+
+### Authentication Methods
+
+#### 1. Basic HTTP Authentication
+
+Enable username/password authentication by setting environment variables:
+
+```bash
+BASIC_AUTH_ENABLED=true
+BASIC_AUTH_USERNAME=admin
+BASIC_AUTH_PASSWORD=your_secure_password
+```
+
+Usage:
+```bash
+curl -u admin:your_secure_password http://localhost:3000/ping
+```
+
+Or with Authorization header:
+```bash
+curl -H "Authorization: Basic $(echo -n 'admin:password' | base64)" http://localhost:3000/ping
+```
+
+#### 2. API Key Authentication
+
+Enable API key authentication by setting environment variables:
+
+```bash
+API_KEYS_ENABLED=true
+API_KEYS='{"your-api-key-1":"read,write","your-api-key-2":"read"}'
+```
+
+Usage:
+```bash
+curl -H "X-API-Key: your-api-key-1" http://localhost:3000/ping
+```
+
+Permission levels:
+- `read` - Can read data and retrieve resources
+- `write` - Can send messages, manage accounts, and modify data
+- `admin` - Full access (reserved for administrative tasks)
+
+### Rate Limiting
+
+Prevent abuse and protect server resources with rate limiting:
+
+```bash
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_WINDOW_MS=900000     # 15 minutes (default)
+RATE_LIMIT_MAX_REQUESTS=100     # Max requests per window
+```
+
+Returns `429 Too Many Requests` when exceeded.
+
+### Webhook URL Validation (SSRF Prevention)
+
+Protect against Server-Side Request Forgery (SSRF) attacks:
+
+```bash
+WEBHOOK_URL_VALIDATION_ENABLED=true
+ENFORCE_HTTPS_WEBHOOKS=true     # Require HTTPS in production
+```
+
+Blocked targets:
+- Loopback addresses (127.0.0.1, localhost)
+- Private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+- Cloud metadata endpoints (169.254.169.254, metadata.google.internal, etc.)
+
+### Input Validation
+
+All endpoints validate request data using Zod schemas. Invalid input returns:
+
+```json
+{
+  "ok": false,
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "phoneNumber",
+      "message": "Invalid phone number"
+    }
+  ]
+}
+```
 
 ---
 
