@@ -80,17 +80,17 @@ We're currently working on a major reorganization to improve code quality, maint
 
 ### Timeline
 
-**Phase 1 (Current - Q4 2024):**
+**Phase 1 (In Progress):**
 - Code reorganization into modular structure
 - Enhanced security middleware
 - Comprehensive testing framework
 
-**Phase 2 (Q1 2025):**
+**Phase 2 (Upcoming):**
 - HTTP Authentication (API keys, JWT)
 - Rate limiting per account/IP
 - Advanced input validation
 
-**Phase 3 (Q2 2025):**
+**Phase 3 (Future):**
 - Additional features and optimizations
 - Performance improvements
 - Production readiness
