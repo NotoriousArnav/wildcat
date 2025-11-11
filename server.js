@@ -4,6 +4,7 @@ const express = require('express');
 const helmet = require('helmet');
 
 const { httpLogger, appLogger } = require('./logger');
+const { basicAuthMiddleware, apiKeyMiddleware, globalRateLimiter } = require('./authMiddleware');
 
 const constructApp = function () {
   const app = express();
@@ -11,6 +12,14 @@ const constructApp = function () {
   app.use(helmet());
   app.use(express.json());
   app.use(httpLogger({ redactBody: false }));
+
+  // Apply authentication middleware (if enabled)
+  app.use(basicAuthMiddleware());
+  app.use(apiKeyMiddleware());
+
+  // Apply rate limiting middleware (if enabled)
+  app.use(globalRateLimiter());
+
   return app;
 };
 

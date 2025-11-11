@@ -2,8 +2,9 @@ const { z } = require('zod');
 
 // Common patterns
 const PHONE_PATTERN = /^[0-9+\-\s()]{10,20}$/;
-const URL_PATTERN = /^https?:\/\/.+/;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// URL_PATTERN and UUID_PATTERN are kept for future use
+// const URL_PATTERN = /^https?:\/\/.+/;
+// const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ============================================================
 // Auth Schemas
@@ -39,7 +40,7 @@ const sendMediaSchema = z.object({
 const createGroupSchema = z.object({
   groupName: z.string().min(1).max(64),
   participants: z.array(
-    z.string().regex(PHONE_PATTERN, 'Invalid phone number')
+    z.string().regex(PHONE_PATTERN, 'Invalid phone number'),
   ).min(2),
 });
 
@@ -55,7 +56,7 @@ const addGroupMemberSchema = z.object({
 const webhookSchema = z.object({
   webhookUrl: z.string().url('Invalid webhook URL'),
   events: z.array(
-    z.enum(['message', 'status', 'group', 'error'])
+    z.enum(['message', 'status', 'group', 'error']),
   ).min(1),
   active: z.boolean().optional().default(true),
 });
@@ -63,7 +64,7 @@ const webhookSchema = z.object({
 const webhookUpdateSchema = z.object({
   webhookUrl: z.string().url('Invalid webhook URL').optional(),
   events: z.array(
-    z.enum(['message', 'status', 'group', 'error'])
+    z.enum(['message', 'status', 'group', 'error']),
   ).optional(),
   active: z.boolean().optional(),
 });
