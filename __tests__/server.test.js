@@ -19,7 +19,7 @@ describe('Server Module', () => {
       use: jest.fn(),
       listen: jest.fn((port, host, callback) => {
         callback();
-      })
+      }),
     };
     
     express.mockReturnValue(mockApp);
@@ -30,7 +30,7 @@ describe('Server Module', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
-      debug: jest.fn()
+      debug: jest.fn(),
     };
     
     appLogger.mockReturnValue(mockLogger);
@@ -98,7 +98,7 @@ describe('Server Module', () => {
       expect(mockApp.listen).toHaveBeenCalledWith(
         3000,
         '0.0.0.0',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -110,7 +110,7 @@ describe('Server Module', () => {
       expect(mockApp.listen).toHaveBeenCalledWith(
         '8080',
         '0.0.0.0',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -122,7 +122,7 @@ describe('Server Module', () => {
       expect(mockApp.listen).toHaveBeenCalledWith(
         3000,
         '127.0.0.1',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -132,7 +132,7 @@ describe('Server Module', () => {
       expect(appLogger).toHaveBeenCalledWith('server');
       expect(mockLogger.info).toHaveBeenCalledWith(
         'server_running',
-        { host: '0.0.0.0', port: 3000 }
+        { host: '0.0.0.0', port: 3000 },
       );
     });
 
@@ -144,7 +144,7 @@ describe('Server Module', () => {
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'server_running',
-        { host: 'localhost', port: '9000' }
+        { host: 'localhost', port: '9000' },
       );
     });
 

@@ -26,7 +26,7 @@ describe('Management Routes Module', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
-      debug: jest.fn()
+      debug: jest.fn(),
     };
 
     appLogger.mockReturnValue(mockLogger);
@@ -34,7 +34,7 @@ describe('Management Routes Module', () => {
     mockRouter = {
       post: jest.fn(),
       get: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     };
 
     express.Router = jest.fn(() => mockRouter);
@@ -43,7 +43,7 @@ describe('Management Routes Module', () => {
       createAccount: jest.fn(),
       listAccounts: jest.fn(),
       getAccount: jest.fn(),
-      deleteAccount: jest.fn()
+      deleteAccount: jest.fn(),
     };
 
     mockSocketManager = {
@@ -51,15 +51,15 @@ describe('Management Routes Module', () => {
       getSocket: jest.fn(),
       getAllSockets: jest.fn(),
       removeSocket: jest.fn(),
-      deleteAccountData: jest.fn()
+      deleteAccountData: jest.fn(),
     };
 
     mockApp = {
-      use: jest.fn()
+      use: jest.fn(),
     };
 
     mockDb = {
-      collection: jest.fn()
+      collection: jest.fn(),
     };
 
     connectToDB.mockResolvedValue(mockDb);
@@ -145,7 +145,7 @@ describe('Management Routes Module', () => {
       req = { body: {} };
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -157,7 +157,7 @@ describe('Management Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'id is required'
+        error: 'id is required',
       });
     });
 
@@ -212,18 +212,18 @@ describe('Management Routes Module', () => {
       req = {};
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
     it('should list all accounts with current status', async () => {
       const accounts = [
         { _id: 'acc1', name: 'Account 1' },
-        { _id: 'acc2', name: 'Account 2' }
+        { _id: 'acc2', name: 'Account 2' },
       ];
       const sockets = [
         { id: 'acc1', status: 'connected', qr: null },
-        { id: 'acc2', status: 'connecting', qr: 'qr-code' }
+        { id: 'acc2', status: 'connecting', qr: 'qr-code' },
       ];
       
       mockAccountManager.listAccounts.mockResolvedValue(accounts);
@@ -236,8 +236,8 @@ describe('Management Routes Module', () => {
         ok: true,
         accounts: [
           { _id: 'acc1', name: 'Account 1', currentStatus: 'connected', hasQR: false },
-          { _id: 'acc2', name: 'Account 2', currentStatus: 'connecting', hasQR: true }
-        ]
+          { _id: 'acc2', name: 'Account 2', currentStatus: 'connecting', hasQR: true },
+        ],
       });
     });
 
@@ -251,7 +251,7 @@ describe('Management Routes Module', () => {
       
       expect(res.json).toHaveBeenCalledWith({
         ok: true,
-        accounts: [{ _id: 'acc1', name: 'Account 1', currentStatus: 'not_started', hasQR: false }]
+        accounts: [{ _id: 'acc1', name: 'Account 1', currentStatus: 'not_started', hasQR: false }],
       });
     });
 
@@ -276,7 +276,7 @@ describe('Management Routes Module', () => {
       req = {};
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -287,8 +287,8 @@ describe('Management Routes Module', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           ok: true,
-          pong: true
-        })
+          pong: true,
+        }),
       );
     });
 
@@ -310,7 +310,7 @@ describe('Management Routes Module', () => {
       req = { params: {} };
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -321,7 +321,7 @@ describe('Management Routes Module', () => {
       mockSocketManager.removeSocket.mockResolvedValue(undefined);
       
       const mockCollection = {
-        drop: jest.fn().mockResolvedValue(true)
+        drop: jest.fn().mockResolvedValue(true),
       };
       mockDb.collection.mockReturnValue(mockCollection);
       
@@ -338,7 +338,7 @@ describe('Management Routes Module', () => {
       expect(res.json).toHaveBeenCalledWith({
         ok: true,
         message: 'Account deleted',
-        deletedCollection: 'auth_test-account'
+        deletedCollection: 'auth_test-account',
       });
     });
 
@@ -347,7 +347,7 @@ describe('Management Routes Module', () => {
       mockAccountManager.deleteAccount.mockResolvedValue('auth_test-account');
       
       const mockCollection = {
-        drop: jest.fn().mockRejectedValue(new Error('Collection not found'))
+        drop: jest.fn().mockRejectedValue(new Error('Collection not found')),
       };
       mockDb.collection.mockReturnValue(mockCollection);
       
@@ -379,7 +379,7 @@ describe('Management Routes Module', () => {
       req = { body: {} };
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -391,7 +391,7 @@ describe('Management Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'url is required and must be a string'
+        error: 'url is required and must be a string',
       });
     });
 
@@ -401,8 +401,8 @@ describe('Management Routes Module', () => {
       const mockCollection = {
         updateOne: jest.fn().mockResolvedValue({
           upsertedId: 'new-id',
-          upsertedCount: 1
-        })
+          upsertedCount: 1,
+        }),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -424,7 +424,7 @@ describe('Management Routes Module', () => {
       req = { query: {} };
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -436,7 +436,7 @@ describe('Management Routes Module', () => {
         skip: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         toArray: jest.fn().mockResolvedValue(mockMessages),
-        countDocuments: jest.fn().mockResolvedValue(100)
+        countDocuments: jest.fn().mockResolvedValue(100),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -451,8 +451,8 @@ describe('Management Routes Module', () => {
           skip: 0,
           limit: 50,
           total: 100,
-          hasMore: true
-        }
+          hasMore: true,
+        },
       });
     });
 
@@ -465,7 +465,7 @@ describe('Management Routes Module', () => {
         skip: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         toArray: jest.fn().mockResolvedValue([]),
-        countDocuments: jest.fn().mockResolvedValue(0)
+        countDocuments: jest.fn().mockResolvedValue(0),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -484,7 +484,7 @@ describe('Management Routes Module', () => {
         skip: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         toArray: jest.fn().mockResolvedValue([]),
-        countDocuments: jest.fn().mockResolvedValue(0)
+        countDocuments: jest.fn().mockResolvedValue(0),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -503,7 +503,7 @@ describe('Management Routes Module', () => {
         skip: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         toArray: jest.fn().mockResolvedValue([]),
-        countDocuments: jest.fn().mockResolvedValue(0)
+        countDocuments: jest.fn().mockResolvedValue(0),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);

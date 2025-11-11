@@ -28,7 +28,7 @@ describe('SocketManager', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
-      debug: jest.fn()
+      debug: jest.fn(),
     };
 
     appLogger.mockReturnValue(mockLogger);
@@ -39,11 +39,11 @@ describe('SocketManager', () => {
       findOne: jest.fn(),
       find: jest.fn(),
       drop: jest.fn(),
-      insertOne: jest.fn()
+      insertOne: jest.fn(),
     };
 
     mockDb = {
-      collection: jest.fn(() => mockCollection)
+      collection: jest.fn(() => mockCollection),
     };
 
     connectToDB.mockResolvedValue(mockDb);
@@ -53,26 +53,26 @@ describe('SocketManager', () => {
       downloadAndStoreMedia: jest.fn(),
       extractQuotedMessage: jest.fn(() => null),
       extractMentions: jest.fn(() => []),
-      getMediaUrl: jest.fn()
+      getMediaUrl: jest.fn(),
     };
 
     MediaHandler.mockImplementation(() => mockMediaHandler);
 
     mockSocket = {
       ev: {
-        on: jest.fn()
+        on: jest.fn(),
       },
       sendMessage: jest.fn(),
       logout: jest.fn(),
       updateMediaMessage: jest.fn(),
-      loadMessage: jest.fn()
+      loadMessage: jest.fn(),
     };
 
     makeWASocket.mockReturnValue(mockSocket);
 
     useMongoDBAuthState.mockResolvedValue({
       state: { creds: {} },
-      saveCreds: jest.fn()
+      saveCreds: jest.fn(),
     });
 
     socketManager = new SocketManager();
@@ -129,7 +129,7 @@ describe('SocketManager', () => {
 
       expect(makeWASocket).toHaveBeenCalledWith({
         auth: { creds: {} },
-        syncFullHistory: true
+        syncFullHistory: true,
       });
       expect(socketManager.sockets.has(accountId)).toBe(true);
     });
@@ -207,7 +207,7 @@ describe('SocketManager', () => {
       await socketManager.createSocket(accountId);
 
       connectionUpdateHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'connection.update'
+        call => call[0] === 'connection.update',
       )[1];
     });
 
@@ -224,7 +224,7 @@ describe('SocketManager', () => {
 
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { _id: accountId },
-        { $set: { status: 'connected', updatedAt: expect.any(Date) } }
+        { $set: { status: 'connected', updatedAt: expect.any(Date) } },
       );
     });
 
@@ -244,9 +244,9 @@ describe('SocketManager', () => {
         connection: 'close',
         lastDisconnect: {
           error: {
-            output: { statusCode: 500 }
-          }
-        }
+            output: { statusCode: 500 },
+          },
+        },
       });
 
       expect(socketManager.sockets.has(accountId)).toBe(false);
@@ -263,9 +263,9 @@ describe('SocketManager', () => {
         connection: 'close',
         lastDisconnect: {
           error: {
-            output: { statusCode: DisconnectReason.loggedOut }
-          }
-        }
+            output: { statusCode: DisconnectReason.loggedOut },
+          },
+        },
       });
 
       const socketInfo = socketManager.sockets.get(accountId);
@@ -278,7 +278,7 @@ describe('SocketManager', () => {
 
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { _id: accountId },
-        { $set: { status: 'connecting', updatedAt: expect.any(Date) } }
+        { $set: { status: 'connecting', updatedAt: expect.any(Date) } },
       );
     });
 
@@ -290,8 +290,8 @@ describe('SocketManager', () => {
       expect(mockSocket.sendMessage).toHaveBeenCalledWith(
         '+1234567890@s.whatsapp.net',
         expect.objectContaining({
-          text: expect.stringContaining('connected successfully')
-        })
+          text: expect.stringContaining('connected successfully'),
+        }),
       );
 
       delete process.env.ADMIN_NUMBER;
@@ -308,7 +308,7 @@ describe('SocketManager', () => {
       await socketManager.createSocket(accountId);
 
       messagesUpsertHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'messages.upsert'
+        call => call[0] === 'messages.upsert',
       )[1];
     });
 
@@ -322,11 +322,11 @@ describe('SocketManager', () => {
       const message = {
         key: { id: 'msg1', remoteJid: 'chat1', fromMe: false },
         messageTimestamp: 1234567890,
-        message: { conversation: 'Hello' }
+        message: { conversation: 'Hello' },
       };
 
       mockCollection.find = jest.fn().mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]),
       });
 
       await messagesUpsertHandler({ type: 'notify', messages: [message] });
@@ -336,8 +336,8 @@ describe('SocketManager', () => {
           accountId,
           messageId: 'msg1',
           chatId: 'chat1',
-          type: 'text'
-        })
+          type: 'text',
+        }),
       );
     });
 
@@ -345,20 +345,20 @@ describe('SocketManager', () => {
       const message = {
         key: { id: 'msg1', remoteJid: 'chat1', fromMe: false },
         messageTimestamp: 1234567890,
-        message: { conversation: 'Test message' }
+        message: { conversation: 'Test message' },
       };
 
       socketManager._extractTextContent = jest.fn(() => 'Test message');
       mockCollection.find = jest.fn().mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]),
       });
 
       await messagesUpsertHandler({ type: 'notify', messages: [message] });
 
       expect(mockCollection.insertOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: 'Test message'
-        })
+          text: 'Test message',
+        }),
       );
     });
 
@@ -366,7 +366,7 @@ describe('SocketManager', () => {
       const message = {
         key: { id: 'msg1', remoteJid: 'chat1', fromMe: false },
         messageTimestamp: 1234567890,
-        message: { imageMessage: { caption: 'Image' } }
+        message: { imageMessage: { caption: 'Image' } },
       };
 
       mockMediaHandler.hasMedia.mockReturnValue(true);
@@ -375,12 +375,12 @@ describe('SocketManager', () => {
         gridFsId: 'gridfs123',
         size: 12345,
         mimetype: 'image/jpeg',
-        fileName: 'image.jpg'
+        fileName: 'image.jpg',
       });
       mockMediaHandler.getMediaUrl.mockReturnValue('/media/msg1');
 
       mockCollection.find = jest.fn().mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]),
       });
 
       await messagesUpsertHandler({ type: 'notify', messages: [message] });
@@ -388,13 +388,13 @@ describe('SocketManager', () => {
       expect(mockMediaHandler.downloadAndStoreMedia).toHaveBeenCalledWith(
         message,
         accountId,
-        mockSocket.updateMediaMessage
+        mockSocket.updateMediaMessage,
       );
 
       expect(mockLogger.info).toHaveBeenCalledWith('media_stored', {
         accountId,
         messageId: 'msg1',
-        mediaType: 'image'
+        mediaType: 'image',
       });
     });
 
@@ -402,14 +402,14 @@ describe('SocketManager', () => {
       const message = {
         key: { id: 'msg1', remoteJid: 'chat1', fromMe: false },
         messageTimestamp: 1234567890,
-        message: { imageMessage: {} }
+        message: { imageMessage: {} },
       };
 
       mockMediaHandler.hasMedia.mockReturnValue(true);
       mockMediaHandler.downloadAndStoreMedia.mockRejectedValue(new Error('Download failed'));
 
       mockCollection.find = jest.fn().mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]),
       });
 
       await messagesUpsertHandler({ type: 'notify', messages: [message] });
@@ -417,19 +417,19 @@ describe('SocketManager', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('media_download_failed', {
         accountId,
         messageId: 'msg1',
-        error: 'Download failed'
+        error: 'Download failed',
       });
     });
 
     it('should handle message processing errors', async () => {
       const message = {
         key: { id: 'msg1', remoteJid: 'chat1', fromMe: false },
-        messageTimestamp: 1234567890
+        messageTimestamp: 1234567890,
       };
 
       mockCollection.insertOne.mockRejectedValue(new Error('Insert failed'));
       mockCollection.find = jest.fn().mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]),
       });
 
       await messagesUpsertHandler({ type: 'notify', messages: [message] });
@@ -437,7 +437,7 @@ describe('SocketManager', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('message_processing_error', {
         accountId,
         messageId: 'msg1',
-        error: 'Insert failed'
+        error: 'Insert failed',
       });
     });
   });
@@ -506,7 +506,7 @@ describe('SocketManager', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith('logout_error', {
         accountId,
-        error: 'Logout failed'
+        error: 'Logout failed',
       });
       expect(socketManager.sockets.has(accountId)).toBe(false);
     });
@@ -541,7 +541,7 @@ describe('SocketManager', () => {
   describe('_extractTextContent', () => {
     it('should extract conversation text', () => {
       const message = {
-        message: { conversation: 'Hello' }
+        message: { conversation: 'Hello' },
       };
 
       const result = socketManager._extractTextContent(message);
@@ -551,7 +551,7 @@ describe('SocketManager', () => {
 
     it('should extract extended text message', () => {
       const message = {
-        message: { extendedTextMessage: { text: 'Extended' } }
+        message: { extendedTextMessage: { text: 'Extended' } },
       };
 
       const result = socketManager._extractTextContent(message);
@@ -561,7 +561,7 @@ describe('SocketManager', () => {
 
     it('should extract image caption', () => {
       const message = {
-        message: { imageMessage: { caption: 'Image caption' } }
+        message: { imageMessage: { caption: 'Image caption' } },
       };
 
       const result = socketManager._extractTextContent(message);
@@ -571,7 +571,7 @@ describe('SocketManager', () => {
 
     it('should extract video caption', () => {
       const message = {
-        message: { videoMessage: { caption: 'Video caption' } }
+        message: { videoMessage: { caption: 'Video caption' } },
       };
 
       const result = socketManager._extractTextContent(message);
@@ -581,7 +581,7 @@ describe('SocketManager', () => {
 
     it('should extract document caption', () => {
       const message = {
-        message: { documentMessage: { caption: 'Document caption' } }
+        message: { documentMessage: { caption: 'Document caption' } },
       };
 
       const result = socketManager._extractTextContent(message);

@@ -60,6 +60,7 @@ docs: update API reference
 ### JavaScript/Node.js
 
 - **Modules:** CommonJS (require/module.exports)
+- **Linting:** [ESLint](https://eslint.org/) is required for all code. Run `npx eslint . --ext .js` before committing. Auto-fix with `--fix`.
 - **Formatting:** Consistent indentation (2 spaces)
 - **Naming:** camelCase for variables/functions, PascalCase for classes
 - **Error Handling:** Use try/catch, return structured error responses
@@ -72,6 +73,19 @@ docs: update API reference
 - **Status Codes:** Standard HTTP codes (200, 400, 404, 500)
 - **Validation:** Input validation on all endpoints
 - **Documentation:** Update API docs for new endpoints
+
+### Linting
+
+- **Run linter:**
+  ```bash
+  npx eslint . --ext .js
+  ```
+- **Auto-fix:**
+  ```bash
+  npx eslint . --ext .js --fix
+  ```
+- **Config:** See `eslint.config.js` in the project root.
+- **CI:** Linting is enforced in GitHub Actions.
 
 ### Example Code Structure
 

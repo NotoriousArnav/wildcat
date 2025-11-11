@@ -61,7 +61,7 @@ class AudioConverter {
 
       logger.info('Converting audio to OGG/Opus', { 
         originalMimetype, 
-        inputSize: inputBuffer.length 
+        inputSize: inputBuffer.length, 
       });
 
       // Write input buffer to temp file
@@ -89,7 +89,7 @@ class AudioConverter {
         '-map', '0:a:0', // Only map first audio stream
         '-ar', '16000', // 16kHz sample rate like real WhatsApp messages
         '-avoid_negative_ts', 'make_zero',
-        '-ac', '1' // Mono
+        '-ac', '1', // Mono
       ];
 
       // Add codec and application-specific settings
@@ -98,20 +98,20 @@ class AudioConverter {
         ffmpegArgs.push(
           '-codec:a', 'libopus',
           '-application', 'voip', // Optimize for voice
-          '-b:a', '24k' // Lower bitrate for voice
+          '-b:a', '24k', // Lower bitrate for voice
         );
       } else {
         // Regular audio/music settings
         ffmpegArgs.push(
           '-codec:a', 'libopus',
-          '-b:a', '64k' // Higher bitrate for music quality
+          '-b:a', '64k', // Higher bitrate for music quality
         );
       }
 
       ffmpegArgs.push(
         '-f', 'ogg',
         '-y', // Overwrite output file
-        outputPath
+        outputPath,
       );
 
       const ffmpeg = spawn(this.ffmpegPath, ffmpegArgs);
@@ -132,7 +132,7 @@ class AudioConverter {
         if (code !== 0) {
           logger.error('ffmpeg conversion failed', { 
             code, 
-            stderr: stderrData.substring(0, 500) 
+            stderr: stderrData.substring(0, 500), 
           });
           this._cleanup([inputPath, outputPath]);
           reject(new Error(`ffmpeg exited with code ${code}`));
@@ -144,7 +144,7 @@ class AudioConverter {
           const convertedBuffer = fs.readFileSync(outputPath);
           logger.info('Audio converted successfully', { 
             originalSize: inputBuffer.length,
-            convertedSize: convertedBuffer.length
+            convertedSize: convertedBuffer.length,
           });
           
           // Cleanup temp files
@@ -179,7 +179,7 @@ class AudioConverter {
       'audio/flac': 'flac',
       'audio/aac': 'aac',
       'audio/3gpp': '3gp',
-      'audio/amr': 'amr'
+      'audio/amr': 'amr',
     };
     
     return map[mimetype] || 'audio';

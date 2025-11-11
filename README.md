@@ -136,8 +136,25 @@ curl -X POST http://localhost:3000/accounts/mybot/message/send \
 - **[Full Setup Guide](./docs/SETUP.md)** - Detailed installation & configuration
 - **[API Reference](./docs/API_Reference.md)** - All available endpoints
 - **[Examples](#-n8n-integration-example)** - Real-world integration examples
+- **[Linting & Code Style](#-linting--code-style)** - Linting, formatting, and code quality
+
 
 ## 📚 Documentation
+
+## 🧹 Linting & Code Style
+
+- **Linting:** This project uses [ESLint](https://eslint.org/) (v9+ flat config) for code quality and consistency.
+- **Run linter:**
+  ```bash
+  npx eslint . --ext .js
+  ```
+- **Auto-fix:**
+  ```bash
+  npx eslint . --ext .js --fix
+  ```
+- **Config:** See `eslint.config.js` in the project root.
+- **CI:** Linting is enforced in GitHub Actions.
+- **Style:** 2-space indent, single quotes, trailing commas, semicolons, CommonJS modules.
 
 <table>
   <tr>
@@ -495,7 +512,6 @@ This project builds on excellent open-source work. See [ACKNOWLEDGMENTS.md](./AC
 
 **Key Dependencies:**
 - **[@whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys)** - WhatsApp Web API
-- **[mongo-baileys](https://github.com/WhiskeySockets/mongo-baileys)** - MongoDB session storage
 - **[Express.js](https://expressjs.com/)** - Web framework
 - **[MongoDB](https://www.mongodb.com/)** - Database
 - **[Socket.io](https://socket.io/)** - Real-time communication

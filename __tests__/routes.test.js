@@ -20,22 +20,22 @@ describe('Routes Module', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
-      debug: jest.fn()
+      debug: jest.fn(),
     };
     
     appLogger.mockReturnValue(mockLogger);
     
     mockStream = {
-      pipe: jest.fn()
+      pipe: jest.fn(),
     };
     
     mockBucket = {
       find: jest.fn(),
-      openDownloadStream: jest.fn(() => mockStream)
+      openDownloadStream: jest.fn(() => mockStream),
     };
     
     mockDb = {
-      collection: jest.fn()
+      collection: jest.fn(),
     };
     
     connectToDB.mockResolvedValue(mockDb);
@@ -90,16 +90,16 @@ describe('Routes Module', () => {
         app: {
           locals: {
             whatsapp_socket: {
-              sendMessage: jest.fn()
-            }
-          }
+              sendMessage: jest.fn(),
+            },
+          },
         },
-        body: {}
+        body: {},
       };
 
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -111,7 +111,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'to and message are required'
+        error: 'to and message are required',
       });
     });
 
@@ -123,7 +123,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'to and message are required'
+        error: 'to and message are required',
       });
     });
 
@@ -138,38 +138,38 @@ describe('Routes Module', () => {
     it('should send message successfully', async () => {
       req.body = { to: '1234567890@s.whatsapp.net', message: 'Hello' };
       req.app.locals.whatsapp_socket.sendMessage.mockResolvedValue({
-        key: { id: 'msg123' }
+        key: { id: 'msg123' },
       });
       
       await handler(req, res);
       
       expect(req.app.locals.whatsapp_socket.sendMessage).toHaveBeenCalledWith(
         '1234567890@s.whatsapp.net',
-        { text: 'Hello' }
+        { text: 'Hello' },
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         ok: true,
-        messageId: 'msg123'
+        messageId: 'msg123',
       });
     });
 
     it('should handle socket errors with structured logging', async () => {
       req.body = { to: '1234567890@s.whatsapp.net', message: 'Hello' };
       req.app.locals.whatsapp_socket.sendMessage.mockRejectedValue(
-        new Error('Socket error')
+        new Error('Socket error'),
       );
       
       await handler(req, res);
       
       expect(mockLogger.error).toHaveBeenCalledWith(
         'send_message_error',
-        { error: 'Socket error' }
+        { error: 'Socket error' },
       );
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'internal_error'
+        error: 'internal_error',
       });
     });
   });
@@ -184,7 +184,7 @@ describe('Routes Module', () => {
       req = {};
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -195,8 +195,8 @@ describe('Routes Module', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           ok: true,
-          pong: true
-        })
+          pong: true,
+        }),
       );
     });
 
@@ -216,13 +216,13 @@ describe('Routes Module', () => {
       handler = filesRoute.handler;
 
       req = {
-        params: {}
+        params: {},
       };
 
       res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn().mockReturnThis(),
-        set: jest.fn()
+        set: jest.fn(),
       };
     });
 
@@ -234,14 +234,14 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'id is required'
+        error: 'id is required',
       });
     });
 
     it('should return 404 when file not found', async () => {
       req.params = { id: '507f1f77bcf86cd799439011' };
       mockBucket.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([])
+        toArray: jest.fn().mockResolvedValue([]),
       });
       
       await handler(req, res);
@@ -249,7 +249,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'file not found'
+        error: 'file not found',
       });
     });
 
@@ -258,11 +258,11 @@ describe('Routes Module', () => {
       const mockFile = {
         _id: new ObjectId('507f1f77bcf86cd799439011'),
         contentType: 'image/jpeg',
-        length: 12345
+        length: 12345,
       };
       
       mockBucket.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([mockFile])
+        toArray: jest.fn().mockResolvedValue([mockFile]),
       });
       
       await handler(req, res);
@@ -277,11 +277,11 @@ describe('Routes Module', () => {
       req.params = { id: '507f1f77bcf86cd799439011' };
       const mockFile = {
         _id: new ObjectId('507f1f77bcf86cd799439011'),
-        length: 12345
+        length: 12345,
       };
       
       mockBucket.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([mockFile])
+        toArray: jest.fn().mockResolvedValue([mockFile]),
       });
       
       await handler(req, res);
@@ -297,12 +297,12 @@ describe('Routes Module', () => {
       
       expect(mockLogger.error).toHaveBeenCalledWith(
         'fetch_file_error',
-        { error: 'DB connection failed' }
+        { error: 'DB connection failed' },
       );
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'internal_error'
+        error: 'internal_error',
       });
     });
   });
@@ -315,12 +315,12 @@ describe('Routes Module', () => {
       handler = webhooksRoute.handler;
 
       req = {
-        body: {}
+        body: {},
       };
 
       res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis()
+        json: jest.fn().mockReturnThis(),
       };
     });
 
@@ -332,7 +332,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'url is required and must be a string'
+        error: 'url is required and must be a string',
       });
     });
 
@@ -344,7 +344,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'url is required and must be a string'
+        error: 'url is required and must be a string',
       });
     });
 
@@ -356,7 +356,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'invalid URL'
+        error: 'invalid URL',
       });
     });
 
@@ -368,7 +368,7 @@ describe('Routes Module', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'only http/https URLs are allowed'
+        error: 'only http/https URLs are allowed',
       });
     });
 
@@ -378,8 +378,8 @@ describe('Routes Module', () => {
       const mockCollection = {
         updateOne: jest.fn().mockResolvedValue({
           upsertedId: 'new-id',
-          upsertedCount: 1
-        })
+          upsertedCount: 1,
+        }),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -389,13 +389,13 @@ describe('Routes Module', () => {
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { url: 'https://example.com/webhook' },
         { $setOnInsert: expect.objectContaining({ url: 'https://example.com/webhook' }) },
-        { upsert: true }
+        { upsert: true },
       );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         ok: true,
         url: 'https://example.com/webhook',
-        created: true
+        created: true,
       });
     });
 
@@ -405,8 +405,8 @@ describe('Routes Module', () => {
       const mockCollection = {
         updateOne: jest.fn().mockResolvedValue({
           upsertedId: null,
-          upsertedCount: 0
-        })
+          upsertedCount: 0,
+        }),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -417,7 +417,7 @@ describe('Routes Module', () => {
       expect(res.json).toHaveBeenCalledWith({
         ok: true,
         url: 'https://example.com/webhook',
-        created: false
+        created: false,
       });
     });
 
@@ -429,12 +429,12 @@ describe('Routes Module', () => {
       
       expect(mockLogger.error).toHaveBeenCalledWith(
         'webhook_register_error',
-        { error: 'DB error' }
+        { error: 'DB error' },
       );
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         ok: false,
-        error: 'internal_error'
+        error: 'internal_error',
       });
     });
 
@@ -444,8 +444,8 @@ describe('Routes Module', () => {
       const mockCollection = {
         updateOne: jest.fn().mockResolvedValue({
           upsertedId: 'new-id',
-          upsertedCount: 1
-        })
+          upsertedCount: 1,
+        }),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);
@@ -460,8 +460,8 @@ describe('Routes Module', () => {
       
       const mockCollection = {
         updateOne: jest.fn().mockResolvedValue({
-          upsertedId: 'new-id'
-        })
+          upsertedId: 'new-id',
+        }),
       };
       
       mockDb.collection.mockReturnValue(mockCollection);

@@ -74,22 +74,22 @@ class SocketManager {
         } else {
           socketInfo.status = 'logged_out';
           socketLog.info('account_logged_out', { accountId });
-try {
-             const res2 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'logged_out', updatedAt: new Date() } });
-             socketLog.info('account_status_updated', { accountId, status: 'logged_out', modifiedCount: res2.modifiedCount });
-           } catch (err) {
-             socketLog.error('account_status_update_failed', { accountId, status: 'logged_out', error: err && err.message });
-           }
+          try {
+            const res2 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'logged_out', updatedAt: new Date() } });
+            socketLog.info('account_status_updated', { accountId, status: 'logged_out', modifiedCount: res2.modifiedCount });
+          } catch (err) {
+            socketLog.error('account_status_update_failed', { accountId, status: 'logged_out', error: err && err.message });
+          }
         }
       } else if (connection === 'open') {
         socketInfo.status = 'connected';
         socketLog.info('account_connected', { accountId });
-try {
-           const res3 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connected', updatedAt: new Date() } });
-           socketLog.info('account_status_updated', { accountId, status: 'connected', modifiedCount: res3.modifiedCount });
-         } catch (err) {
-           socketLog.error('account_status_update_failed', { accountId, status: 'connected', error: err && err.message });
-         }
+        try {
+          const res3 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connected', updatedAt: new Date() } });
+          socketLog.info('account_status_updated', { accountId, status: 'connected', modifiedCount: res3.modifiedCount });
+        } catch (err) {
+          socketLog.error('account_status_update_failed', { accountId, status: 'connected', error: err && err.message });
+        }
         if (process.env.ADMIN_NUMBER) {
           try {
             await sock.sendMessage(process.env.ADMIN_NUMBER, { text: `\u2705 Account ${accountId} connected successfully!` });
@@ -97,13 +97,13 @@ try {
             socketLog.error('admin_notify_failed', { accountId, error: notifyErr.message });
           }
         }
-       } else if (connection === 'connecting') {
-try {
-           const res4 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connecting', updatedAt: new Date() } });
-           socketLog.info('account_status_updated', { accountId, status: 'connecting', modifiedCount: res4.modifiedCount });
-         } catch (err) {
-           socketLog.error('account_status_update_failed', { accountId, status: 'connecting', error: err && err.message });
-         }
+      } else if (connection === 'connecting') {
+        try {
+          const res4 = await accountsCol.updateOne({ _id: { $eq: accountId } }, { $set: { status: 'connecting', updatedAt: new Date() } });
+          socketLog.info('account_status_updated', { accountId, status: 'connecting', modifiedCount: res4.modifiedCount });
+        } catch (err) {
+          socketLog.error('account_status_update_failed', { accountId, status: 'connecting', error: err && err.message });
+        }
       }
     });
 
@@ -126,7 +126,7 @@ try {
               mediaInfo = await this.mediaHandler.downloadAndStoreMedia(
                 msg,
                 accountId,
-                sock.updateMediaMessage
+                sock.updateMediaMessage,
               );
               socketLog.info('media_stored', { accountId, messageId: msg.key.id, mediaType: mediaInfo.mediaType });
             } catch (err) {
@@ -250,7 +250,7 @@ try {
     if (msg.videoMessage?.caption) return msg.videoMessage.caption;
     if (msg.documentMessage?.caption) return msg.documentMessage.caption;
     return null;
-    }
   }
+}
 
 module.exports = SocketManager;

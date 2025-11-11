@@ -79,5 +79,5 @@ module.exports = {
       }
     } },
     { method: 'get', path: '/files/:id', handler: fetchFile },
-  ]
+  ],
 };

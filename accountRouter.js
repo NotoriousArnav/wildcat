@@ -8,7 +8,7 @@ const { appLogger } = require('./logger');
 // Configure multer for memory storage
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }
+  limits: { fileSize: 50 * 1024 * 1024 },
 });
 
 /**
@@ -79,10 +79,10 @@ function createAccountRouter(accountId, socketManager) {
             remoteJid: dbMsg.rawMessage.key.remoteJid,
             id: dbMsg.rawMessage.key.id,
             fromMe: dbMsg.rawMessage.key.fromMe,
-            participant
+            participant,
           },
           message: dbMsg.rawMessage.message,
-          messageTimestamp: dbMsg.rawMessage.messageTimestamp
+          messageTimestamp: dbMsg.rawMessage.messageTimestamp,
         };
         log.info('quote_using_sanitized_rawMessage', { quotedMessageId });
         return sanitizedQuote;
@@ -94,10 +94,10 @@ function createAccountRouter(accountId, socketManager) {
           remoteJid: dbMsg.chatId,
           id: dbMsg.messageId,
           fromMe: dbMsg.fromMe,
-          participant: dbMsg.fromMe ? undefined : dbMsg.from
+          participant: dbMsg.fromMe ? undefined : dbMsg.from,
         },
         message: { conversation: dbMsg.text || '' },
-        messageTimestamp: dbMsg.timestamp
+        messageTimestamp: dbMsg.timestamp,
       };
     } catch (err) {
       log.error('quote_load_error', { quotedMessageId, error: err.message });
@@ -257,7 +257,7 @@ function createAccountRouter(accountId, socketManager) {
         video: req.file.buffer,
         caption: caption || undefined,
         mimetype: req.file.mimetype,
-        gifPlayback: gifPlayback === 'true' || gifPlayback === true
+        gifPlayback: gifPlayback === 'true' || gifPlayback === true,
       };
       const sendOptions = {};
       if (quotedMessageId) {
@@ -447,12 +447,12 @@ function createAccountRouter(accountId, socketManager) {
         { $match: { accountId } },
         { $sort: { timestamp: -1 } },
         { $group: { _id: '$chatId', lastMessage: { $first: '$$ROOT' }, messageCount: { $sum: 1 }, lastTimestamp: { $first: '$timestamp' } } },
-        { $sort: { lastTimestamp: -1 } }
+        { $sort: { lastTimestamp: -1 } },
       ]).toArray();
       const formattedChats = chats.map(chat => ({
         chatId: chat._id,
         messageCount: chat.messageCount,
-        lastMessage: { messageId: chat.lastMessage.messageId, text: chat.lastMessage.text, type: chat.lastMessage.type, timestamp: chat.lastMessage.timestamp, fromMe: chat.lastMessage.fromMe }
+        lastMessage: { messageId: chat.lastMessage.messageId, text: chat.lastMessage.text, type: chat.lastMessage.type, timestamp: chat.lastMessage.timestamp, fromMe: chat.lastMessage.fromMe },
       }));
       return res.status(200).json({ ok: true, chats: formattedChats });
     } catch (err) {

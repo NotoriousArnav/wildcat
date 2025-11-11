@@ -30,7 +30,7 @@ class AccountManager {
       id: accountId, 
       name, 
       collectionName: collName,
-      status: 'created' 
+      status: 'created', 
     };
   }
 
@@ -48,7 +48,7 @@ class AccountManager {
     const collection = this.db.collection('accounts');
     await collection.updateOne(
       { _id: accountId }, 
-      { $set: { status, updatedAt: new Date() } }
+      { $set: { status, updatedAt: new Date() } },
     );
   }
 
