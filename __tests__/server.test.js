@@ -1,11 +1,11 @@
 const express = require('express');
 const helmet = require('helmet');
-const { constructApp, startServer } = require('../server');
-const { httpLogger, appLogger } = require('../logger');
+const { constructApp, startServer } = require('../src/server');
+const { httpLogger, appLogger } = require('../src/logger');
 
 jest.mock('express');
 jest.mock('helmet');
-jest.mock('../logger');
+jest.mock('../src/logger');
 
 describe('Server Module', () => {
   let mockApp;
@@ -88,8 +88,8 @@ describe('Server Module', () => {
 
   describe('startServer', () => {
     beforeEach(() => {
-      process.env.PORT = undefined;
-      process.env.HOST = undefined;
+      delete process.env.PORT;
+      delete process.env.HOST;
     });
 
     it('should start server on default port and host', async () => {

@@ -1,36 +1,40 @@
-const SocketManager = require('../socketManager');
+// Mock external dependencies BEFORE requiring modules that use them
+jest.mock('@whiskeysockets/baileys');
+jest.mock('qrcode-terminal');
+jest.mock('../src/mongoAuthState');
+jest.mock('../src/db');
+jest.mock('../src/logger');
+jest.mock('../src/mediaHandler');
+
+// Setup logger mock before requiring socketManager (which calls appLogger at module load)
+const { wireSocketLogging, appLogger } = require('../src/logger');
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+};
+appLogger.mockReturnValue(mockLogger);
+wireSocketLogging.mockImplementation(() => {});
+
+const SocketManager = require('../src/socketManager');
 const makeWASocket = require('@whiskeysockets/baileys').default;
 const { DisconnectReason } = require('@whiskeysockets/baileys');
-const useMongoDBAuthState = require('../mongoAuthState');
-const { connectToDB } = require('../db');
-const { wireSocketLogging, appLogger } = require('../logger');
-const MediaHandler = require('../mediaHandler');
-
-jest.mock('@whiskeysockets/baileys');
-jest.mock('../mongoAuthState');
-jest.mock('../db');
-jest.mock('../logger');
-jest.mock('../mediaHandler');
-jest.mock('qrcode-terminal');
+const useMongoDBAuthState = require('../src/mongoAuthState');
+const { connectToDB } = require('../src/db');
+const MediaHandler = require('../src/mediaHandler');
 
 describe('SocketManager', () => {
   let socketManager;
   let mockDb;
   let mockMediaHandler;
-  let mockLogger;
   let mockSocket;
   let mockCollection;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    };
-
+    // Re-setup appLogger mock after clearAllMocks
     appLogger.mockReturnValue(mockLogger);
     wireSocketLogging.mockImplementation(() => {});
 
@@ -70,10 +74,13 @@ describe('SocketManager', () => {
 
     makeWASocket.mockReturnValue(mockSocket);
 
-    useMongoDBAuthState.mockResolvedValue({
-      state: { creds: {} },
-      saveCreds: jest.fn(),
-    });
+    // Setup the mongoAuthState mock to return a minimal auth state
+    useMongoDBAuthState.mockImplementation(() =>
+      Promise.resolve({
+        state: { creds: {} },
+        saveCreds: jest.fn(),
+      })
+    );
 
     socketManager = new SocketManager();
   });
@@ -223,7 +230,7 @@ describe('SocketManager', () => {
       await connectionUpdateHandler({ connection: 'open' });
 
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
-        { _id: accountId },
+        { _id: { $eq: accountId } },
         { $set: { status: 'connected', updatedAt: expect.any(Date) } },
       );
     });
@@ -234,7 +241,10 @@ describe('SocketManager', () => {
 
       const socketInfo = socketManager.sockets.get(accountId);
       expect(socketInfo.qr).toBe(qr);
-      expect(mockLogger.info).toHaveBeenCalledWith('qr_generated', { accountId });
+      expect(mockLogger.info).toHaveBeenCalledWith('qr_code_display', {
+        accountId,
+        message: `QR Code for account: ${accountId}`,
+      });
     });
 
     it('should handle connection close with reconnect', async () => {
@@ -277,7 +287,7 @@ describe('SocketManager', () => {
       await connectionUpdateHandler({ connection: 'connecting' });
 
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
-        { _id: accountId },
+        { _id: { $eq: accountId } },
         { $set: { status: 'connecting', updatedAt: expect.any(Date) } },
       );
     });

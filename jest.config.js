@@ -2,13 +2,11 @@ module.exports = {
   testEnvironment: 'node',
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    '*.js',
-    '!index.js',
+    'src/**/*.js',
     '!jest.config.js',
     '!coverage/**',
     '!node_modules/**',
     '!scripts/**',
-    '!spam.py',
   ],
   testMatch: [
     '**/__tests__/**/*.test.js',
@@ -24,4 +22,9 @@ module.exports = {
   moduleFileExtensions: ['js', 'json'],
   testTimeout: 10000,
   verbose: true,
+  moduleNameMapper: {
+    '^@whiskeysockets/baileys(.*)$': '<rootDir>/__tests__/mocks/baileys.js',
+    '^qrcode-terminal$': '<rootDir>/__tests__/mocks/qrcodeTerminal.js',
+    '^\\./mongoAuthState$': '<rootDir>/__tests__/mocks/mongoAuthState.js',
+  },
 };

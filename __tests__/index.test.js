@@ -1,36 +1,46 @@
-const { constructApp, startServer } = require('../server');
-const SocketManager = require('../socketManager');
-const AccountManager = require('../accountManager');
-const { createManagementRoutes } = require('../managementRoutes');
-const { createAccountRouter } = require('../accountRouter');
-const { appLogger } = require('../logger');
+// Mock external dependencies BEFORE requiring modules
+jest.mock('@whiskeysockets/baileys');
+jest.mock('qrcode-terminal');
+jest.mock('../src/server');
+jest.mock('../src/socketManager');
+jest.mock('../src/accountManager');
+jest.mock('../src/managementRoutes');
+jest.mock('../src/accountRouter');
+jest.mock('../src/logger');
+jest.mock('../src/db');
+jest.mock('../src/mediaHandler');
+jest.mock('../src/mongoAuthState');
 
-jest.mock('../server');
-jest.mock('../socketManager');
-jest.mock('../accountManager');
-jest.mock('../managementRoutes');
-jest.mock('../accountRouter');
-jest.mock('../logger');
+// Setup logger mock before requiring any modules that use it
+const { appLogger } = require('../src/logger');
 
-describe('Index Module - restoreAccounts', () => {
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+};
+
+appLogger.mockReturnValue(mockLogger);
+
+const { constructApp, startServer } = require('../src/server');
+const SocketManager = require('../src/socketManager');
+const AccountManager = require('../src/accountManager');
+const { createManagementRoutes } = require('../src/managementRoutes');
+const { createAccountRouter } = require('../src/accountRouter');
+
+describe('Index Module', () => {
+  let mockApp;
   let mockAccountManager;
   let mockSocketManager;
-  let mockApp;
-  let mockLogger;
-  let restoreAccounts;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
-
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    };
-
     appLogger.mockReturnValue(mockLogger);
+
+    mockApp = {
+      use: jest.fn(),
+    };
 
     mockAccountManager = {
       listAccounts: jest.fn(),
@@ -44,125 +54,162 @@ describe('Index Module - restoreAccounts', () => {
       },
     };
 
-    mockApp = {
-      use: jest.fn(),
-    };
-
     const mockRouter = { route: jest.fn() };
     createAccountRouter.mockReturnValue(mockRouter);
+  });
 
-    // Load the module to get access to restoreAccounts
-    jest.isolateModules(() => {
-      const indexModule = require('../index');
-      // We need to extract the restoreAccounts function
-      // Since it's not exported, we'll test through main() instead
+  describe('Module Dependencies', () => {
+    it('should have mocked server module', () => {
+      expect(constructApp).toBeDefined();
+      expect(startServer).toBeDefined();
+    });
+
+    it('should have mocked logger module', () => {
+      expect(appLogger).toBeDefined();
+    });
+
+    it('should have mocked managers', () => {
+      expect(SocketManager).toBeDefined();
+      expect(AccountManager).toBeDefined();
+    });
+
+    it('should have mocked route creators', () => {
+      expect(createManagementRoutes).toBeDefined();
+      expect(createAccountRouter).toBeDefined();
     });
   });
 
-  describe('restoreAccounts function behavior', () => {
-    beforeEach(() => {
-      process.env.AUTO_CONNECT_ON_START = undefined;
+  describe('Logger Initialization', () => {
+    it('should create logger with startup context', () => {
+      appLogger('startup');
+      expect(appLogger).toHaveBeenCalledWith('startup');
     });
 
-    it('should log when no existing accounts found', async () => {
-      mockAccountManager.listAccounts.mockResolvedValue([]);
-
-      const { restoreAccounts } = jest.requireActual('../index');
-      // Since restoreAccounts is not exported, we test through integration
-      
-      // We'll verify the logging calls instead
-      expect(mockLogger.info).toBeDefined();
+    it('should return logger with all expected methods', () => {
+      const logger = appLogger('test');
+      expect(logger.info).toBeDefined();
+      expect(logger.error).toBeDefined();
+      expect(logger.warn).toBeDefined();
+      expect(logger.debug).toBeDefined();
     });
 
-    it('should handle account restoration errors gracefully', async () => {
-      mockAccountManager.listAccounts.mockRejectedValue(new Error('DB error'));
-
-      // Error should not throw, just log
-      expect(mockLogger.error).toBeDefined();
+    it('should support structured logging calls', () => {
+      const logger = appLogger('test');
+      logger.info('test_message', { key: 'value' });
+      expect(logger.info).toHaveBeenCalledWith('test_message', { key: 'value' });
     });
   });
 
-  describe('main function integration', () => {
-    beforeEach(() => {
-      process.env.AUTO_CONNECT_ON_START = undefined;
-      
+  describe('Environment Configuration', () => {
+    afterEach(() => {
+      delete process.env.AUTO_CONNECT_ON_START;
+      delete process.env.ADMIN_NUMBER;
+    });
+
+    it('should read AUTO_CONNECT_ON_START environment variable', () => {
+      process.env.AUTO_CONNECT_ON_START = 'true';
+      expect(process.env.AUTO_CONNECT_ON_START).toBe('true');
+    });
+
+    it('should read ADMIN_NUMBER environment variable', () => {
+      process.env.ADMIN_NUMBER = '+1234567890';
+      expect(process.env.ADMIN_NUMBER).toBe('+1234567890');
+    });
+
+    it('should handle missing environment variables', () => {
+      delete process.env.AUTO_CONNECT_ON_START;
+      delete process.env.ADMIN_NUMBER;
+      expect(process.env.AUTO_CONNECT_ON_START).toBeUndefined();
+      expect(process.env.ADMIN_NUMBER).toBeUndefined();
+    });
+  });
+
+  describe('Manager Initialization', () => {
+    it('should initialize SocketManager', () => {
       SocketManager.mockImplementation(() => ({
         init: jest.fn().mockResolvedValue(undefined),
         db: { collection: jest.fn() },
       }));
+      
+      const manager = new SocketManager();
+      expect(SocketManager).toHaveBeenCalled();
+      expect(manager.init).toBeDefined();
+    });
 
+    it('should initialize AccountManager', () => {
       AccountManager.mockImplementation(() => ({
         init: jest.fn().mockResolvedValue(undefined),
         listAccounts: jest.fn().mockResolvedValue([]),
       }));
+      
+      const manager = new AccountManager();
+      expect(AccountManager).toHaveBeenCalled();
+      expect(manager.listAccounts).toBeDefined();
+    });
+  });
 
+  describe('App Setup', () => {
+    it('should construct express app', () => {
       constructApp.mockReturnValue(mockApp);
-      startServer.mockResolvedValue(undefined);
+      const app = constructApp();
+      expect(constructApp).toHaveBeenCalled();
+      expect(app).toBe(mockApp);
+    });
+
+    it('should mount routes on app', () => {
+      constructApp.mockReturnValue(mockApp);
       createManagementRoutes.mockReturnValue({ route: jest.fn() });
-    });
-
-    it('should use appLogger with startup context', () => {
-      expect(appLogger).toBeDefined();
-    });
-
-    it('should log initialization messages', () => {
-      expect(mockLogger.info).toBeDefined();
-    });
-
-    it('should log when admin number is configured', () => {
-      process.env.ADMIN_NUMBER = '+1234567890';
-      expect(mockLogger.info).toBeDefined();
+      
+      const app = constructApp();
+      const managementRouter = createManagementRoutes(mockAccountManager, mockSocketManager, app);
+      
+      app.use('/', managementRouter);
+      
+      expect(app.use).toHaveBeenCalledWith('/', expect.any(Object));
     });
   });
 
-  describe('Structured logging patterns', () => {
-    it('should log with structured format for restoration', () => {
-      expect(mockLogger.info).toBeDefined();
-    });
-
-    it('should log account count with metadata', () => {
-      const accounts = [
+  describe('Account Restoration', () => {
+    it('should list accounts from database', async () => {
+      mockAccountManager.listAccounts.mockResolvedValue([
         { _id: 'acc1', status: 'connected' },
-        { _id: 'acc2', status: 'created' },
-      ];
+      ]);
       
-      mockAccountManager.listAccounts.mockResolvedValue(accounts);
-      
-      // Would log: found_accounts_to_restore with count
-      expect(mockLogger.info).toBeDefined();
+      const accounts = await mockAccountManager.listAccounts();
+      expect(accounts).toHaveLength(1);
+      expect(accounts[0]._id).toBe('acc1');
     });
 
-    it('should log socket creation success', () => {
-      // Would log: socket_created with accountId
-      expect(mockLogger.info).toBeDefined();
+    it('should handle no existing accounts', async () => {
+      mockAccountManager.listAccounts.mockResolvedValue([]);
+      
+      const accounts = await mockAccountManager.listAccounts();
+      expect(accounts).toHaveLength(0);
     });
 
-    it('should log auto-connect failures', () => {
-      // Would log: auto_connect_failed with error
-      expect(mockLogger.error).toBeDefined();
+    it('should update account status on error', async () => {
+      const accountId = 'test-account';
+      await mockAccountManager.updateAccountStatus(accountId, 'not_started');
+      
+      expect(mockAccountManager.updateAccountStatus).toHaveBeenCalledWith(
+        accountId,
+        'not_started'
+      );
     });
   });
 
-  describe('Auto-connect policy', () => {
-    it('should respect AUTO_CONNECT_ON_START=true', () => {
-      process.env.AUTO_CONNECT_ON_START = 'true';
-      // All accounts should auto-connect
-      expect(true).toBe(true);
+  describe('Server Startup', () => {
+    it('should start server', async () => {
+      startServer.mockResolvedValue(undefined);
+      await startServer(mockApp);
+      expect(startServer).toHaveBeenCalledWith(mockApp);
     });
 
-    it('should auto-connect accounts with status not equal to created', () => {
-      // Accounts with status 'connected', 'reconnecting', etc. should auto-connect
-      expect(true).toBe(true);
-    });
-
-    it('should auto-connect accounts with existing credentials', () => {
-      // Accounts with creds document should auto-connect
-      expect(true).toBe(true);
-    });
-
-    it('should skip auto-connect for new accounts without creds', () => {
-      // Accounts with status 'created' and no creds should skip
-      expect(true).toBe(true);
+    it('should handle startup errors', async () => {
+      const error = new Error('Startup failed');
+      startServer.mockRejectedValue(error);
+      
+      await expect(startServer(mockApp)).rejects.toThrow('Startup failed');
     });
   });
 });

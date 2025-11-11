@@ -1,14 +1,22 @@
-const { routes } = require('../routes');
-const { appLogger } = require('../logger');
-const { connectToDB } = require('../db');
-const { GridFSBucket, ObjectId } = require('mongodb');
-
-jest.mock('../logger');
-jest.mock('../db');
+jest.mock('../src/logger');
+jest.mock('../src/db');
 jest.mock('mongodb');
 
+// Initialize mock return values before requiring routes
+const { appLogger } = require('../src/logger');
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+};
+appLogger.mockReturnValue(mockLogger);
+
+const { routes } = require('../src/routes');
+const { connectToDB } = require('../src/db');
+const { GridFSBucket, ObjectId } = require('mongodb');
+
 describe('Routes Module', () => {
-  let mockLogger;
   let mockDb;
   let mockBucket;
   let mockStream;
@@ -16,13 +24,7 @@ describe('Routes Module', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    };
-    
+    // Re-setup mockLogger return value after clearAllMocks
     appLogger.mockReturnValue(mockLogger);
     
     mockStream = {
