@@ -43,7 +43,7 @@ function createManagementRoutes(accountManager, socketManager, app) {
       const result = accounts.map(acc => ({
         ...acc,
         currentStatus: statusMap.get(acc._id)?.status || 'not_started',
-        hasQR: !!statusMap.get(acc._id)?.qr
+        hasQR: !!statusMap.get(acc._id)?.qr,
       }));
       return res.status(200).json({ ok: true, accounts: result });
     } catch (err) {

@@ -11,7 +11,7 @@ describe('Logger Module', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockWriteStream = {
-      write: jest.fn()
+      write: jest.fn(),
     };
     fs.existsSync.mockReturnValue(true);
     fs.mkdirSync.mockReturnValue(undefined);
@@ -36,16 +36,16 @@ describe('Logger Module', () => {
       logger.info('test_message', { key: 'value' });
       
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"level":"info"')
+        expect.stringContaining('"level":"info"'),
       );
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"message":"test_message"')
+        expect.stringContaining('"message":"test_message"'),
       );
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"context":"test-context"')
+        expect.stringContaining('"context":"test-context"'),
       );
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"key":"value"')
+        expect.stringContaining('"key":"value"'),
       );
     });
 
@@ -54,10 +54,10 @@ describe('Logger Module', () => {
       logger.warn('warning_message', { warning: true });
       
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"level":"warn"')
+        expect.stringContaining('"level":"warn"'),
       );
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"message":"warning_message"')
+        expect.stringContaining('"message":"warning_message"'),
       );
     });
 
@@ -66,10 +66,10 @@ describe('Logger Module', () => {
       logger.error('error_message', { error: 'test error' });
       
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"level":"error"')
+        expect.stringContaining('"level":"error"'),
       );
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"message":"error_message"')
+        expect.stringContaining('"message":"error_message"'),
       );
     });
 
@@ -78,10 +78,10 @@ describe('Logger Module', () => {
       logger.debug('debug_message', { debug: true });
       
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"level":"debug"')
+        expect.stringContaining('"level":"debug"'),
       );
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"message":"debug_message"')
+        expect.stringContaining('"message":"debug_message"'),
       );
     });
 
@@ -103,7 +103,7 @@ describe('Logger Module', () => {
       
       expect(fs.mkdirSync).toHaveBeenCalledWith(
         expect.stringContaining('.logs'),
-        { recursive: true }
+        { recursive: true },
       );
     });
 
@@ -113,7 +113,7 @@ describe('Logger Module', () => {
       
       expect(fs.createWriteStream).toHaveBeenCalledWith(
         expect.stringContaining('app.log'),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -122,7 +122,7 @@ describe('Logger Module', () => {
       logger.info('test_message');
       
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringContaining('"message":"test_message"')
+        expect.stringContaining('"message":"test_message"'),
       );
     });
 
@@ -131,7 +131,7 @@ describe('Logger Module', () => {
       logger.info('test_message');
       
       expect(mockWriteStream.write).toHaveBeenCalledWith(
-        expect.stringMatching(/"ts":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"/)
+        expect.stringMatching(/"ts":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"/),
       );
     });
 
@@ -156,7 +156,7 @@ describe('Logger Module', () => {
         url: '/test',
         headers: { 'user-agent': 'test-agent' },
         ip: '127.0.0.1',
-        body: { data: 'test' }
+        body: { data: 'test' },
       };
       res = {
         statusCode: 200,
@@ -165,7 +165,7 @@ describe('Logger Module', () => {
             // Simulate immediate finish for testing
             setTimeout(callback, 0);
           }
-        })
+        }),
       };
       next = jest.fn();
     });
@@ -183,16 +183,16 @@ describe('Logger Module', () => {
       
       setTimeout(() => {
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"message":"http_request"')
+          expect.stringContaining('"message":"http_request"'),
         );
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"method":"GET"')
+          expect.stringContaining('"method":"GET"'),
         );
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"url":"/test"')
+          expect.stringContaining('"url":"/test"'),
         );
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"status":200')
+          expect.stringContaining('"status":200'),
         );
         done();
       }, 50);
@@ -215,7 +215,7 @@ describe('Logger Module', () => {
       
       setTimeout(() => {
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"reqBody"')
+          expect.stringContaining('"reqBody"'),
         );
         done();
       }, 50);
@@ -228,7 +228,7 @@ describe('Logger Module', () => {
       setTimeout(() => {
         expect(fs.createWriteStream).toHaveBeenCalledWith(
           expect.stringContaining('custom-http.log'),
-          expect.any(Object)
+          expect.any(Object),
         );
         done();
       }, 50);
@@ -240,7 +240,7 @@ describe('Logger Module', () => {
       
       setTimeout(() => {
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"durationMs"')
+          expect.stringContaining('"durationMs"'),
         );
         done();
       }, 50);
@@ -252,7 +252,7 @@ describe('Logger Module', () => {
       
       setTimeout(() => {
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"ua":"test-agent"')
+          expect.stringContaining('"ua":"test-agent"'),
         );
         done();
       }, 50);
@@ -264,7 +264,7 @@ describe('Logger Module', () => {
       
       setTimeout(() => {
         expect(mockWriteStream.write).toHaveBeenCalledWith(
-          expect.stringContaining('"ip":"127.0.0.1"')
+          expect.stringContaining('"ip":"127.0.0.1"'),
         );
         done();
       }, 50);
@@ -277,11 +277,11 @@ describe('Logger Module', () => {
     beforeEach(() => {
       mockSocket = {
         ev: {
-          on: jest.fn()
-        }
+          on: jest.fn(),
+        },
       };
       mockLogger = {
-        info: jest.fn()
+        info: jest.fn(),
       };
     });
 
@@ -290,7 +290,7 @@ describe('Logger Module', () => {
       
       expect(mockSocket.ev.on).toHaveBeenCalledWith(
         'connection.update',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -299,7 +299,7 @@ describe('Logger Module', () => {
       
       expect(mockSocket.ev.on).toHaveBeenCalledWith(
         'creds.update',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -308,7 +308,7 @@ describe('Logger Module', () => {
       
       expect(mockSocket.ev.on).toHaveBeenCalledWith(
         'messages.upsert',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -317,7 +317,7 @@ describe('Logger Module', () => {
       
       expect(mockSocket.ev.on).toHaveBeenCalledWith(
         'messages.update',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -325,14 +325,14 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const connectionUpdateHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'connection.update'
+        call => call[0] === 'connection.update',
       )[1];
       
       connectionUpdateHandler({ connection: 'open', lastDisconnect: null });
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'connection.update',
-        expect.objectContaining({ connection: 'open' })
+        expect.objectContaining({ connection: 'open' }),
       );
     });
 
@@ -340,7 +340,7 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const credsUpdateHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'creds.update'
+        call => call[0] === 'creds.update',
       )[1];
       
       credsUpdateHandler();
@@ -352,14 +352,14 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const messagesUpsertHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'messages.upsert'
+        call => call[0] === 'messages.upsert',
       )[1];
       
       messagesUpsertHandler({ type: 'notify', messages: [{}, {}, {}] });
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'messages.upsert',
-        expect.objectContaining({ count: 3, type: 'notify' })
+        expect.objectContaining({ count: 3, type: 'notify' }),
       );
     });
 
@@ -367,14 +367,14 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const messagesUpdateHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'messages.update'
+        call => call[0] === 'messages.update',
       )[1];
       
       messagesUpdateHandler([{}, {}]);
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'messages.update',
-        expect.objectContaining({ count: 2 })
+        expect.objectContaining({ count: 2 }),
       );
     });
 
@@ -387,14 +387,14 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const messagesUpsertHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'messages.upsert'
+        call => call[0] === 'messages.upsert',
       )[1];
       
       messagesUpsertHandler({ type: 'notify', messages: [] });
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'messages.upsert',
-        expect.objectContaining({ count: 0 })
+        expect.objectContaining({ count: 0 }),
       );
     });
 
@@ -402,14 +402,14 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const messagesUpsertHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'messages.upsert'
+        call => call[0] === 'messages.upsert',
       )[1];
       
       messagesUpsertHandler({ type: 'notify' });
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'messages.upsert',
-        expect.objectContaining({ count: 0 })
+        expect.objectContaining({ count: 0 }),
       );
     });
 
@@ -417,7 +417,7 @@ describe('Logger Module', () => {
       wireSocketLogging(mockSocket, mockLogger);
       
       const connectionUpdateHandler = mockSocket.ev.on.mock.calls.find(
-        call => call[0] === 'connection.update'
+        call => call[0] === 'connection.update',
       )[1];
       
       connectionUpdateHandler({
@@ -425,15 +425,15 @@ describe('Logger Module', () => {
         lastDisconnect: {
           error: {
             output: {
-              statusCode: 401
-            }
-          }
-        }
+              statusCode: 401,
+            },
+          },
+        },
       });
       
       expect(mockLogger.info).toHaveBeenCalledWith(
         'connection.update',
-        expect.objectContaining({ lastDisconnectCode: 401 })
+        expect.objectContaining({ lastDisconnectCode: 401 }),
       );
     });
   });

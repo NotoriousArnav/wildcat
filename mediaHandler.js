@@ -27,7 +27,7 @@ class MediaHandler {
     try {
       logger.info('Downloading media from message', { 
         accountId, 
-        messageId: message.key.id 
+        messageId: message.key.id, 
       });
 
       // Download media as buffer
@@ -37,8 +37,8 @@ class MediaHandler {
         {},
         {
           logger,
-          reuploadRequest
-        }
+          reuploadRequest,
+        },
       );
 
       if (!buffer) {
@@ -58,8 +58,8 @@ class MediaHandler {
           messageId: message.key.id,
           chatId: message.key.remoteJid,
           uploadedAt: new Date(),
-          ...metadata
-        }
+          ...metadata,
+        },
       });
 
       // Convert buffer to stream and pipe to GridFS
@@ -74,13 +74,13 @@ class MediaHandler {
           .on('finish', () => {
             logger.info('Media stored successfully', { 
               fileId: uploadStream.id,
-              filename 
+              filename, 
             });
             resolve({
               gridFsId: uploadStream.id,
               filename,
               size: buffer.length,
-              ...metadata
+              ...metadata,
             });
           });
       });
@@ -89,7 +89,7 @@ class MediaHandler {
       logger.error('Error downloading and storing media', { 
         accountId,
         messageId: message?.key?.id,
-        error: err.message 
+        error: err.message, 
       });
       throw err;
     }
@@ -121,8 +121,8 @@ class MediaHandler {
           contentType: file.contentType,
           length: file.length,
           uploadDate: file.uploadDate,
-          ...file.metadata
-        }
+          ...file.metadata,
+        },
       };
 
     } catch (err) {
@@ -182,23 +182,23 @@ class MediaHandler {
     let mediaMsg = null;
     
     switch(mediaType) {
-      case 'image':
-        mediaMsg = msg.imageMessage;
-        break;
-      case 'video':
-        mediaMsg = msg.videoMessage;
-        break;
-      case 'audio':
-        mediaMsg = msg.audioMessage;
-        break;
-      case 'document':
-        mediaMsg = msg.documentMessage;
-        break;
-      case 'sticker':
-        mediaMsg = msg.stickerMessage;
-        break;
-      default:
-        return {};
+    case 'image':
+      mediaMsg = msg.imageMessage;
+      break;
+    case 'video':
+      mediaMsg = msg.videoMessage;
+      break;
+    case 'audio':
+      mediaMsg = msg.audioMessage;
+      break;
+    case 'document':
+      mediaMsg = msg.documentMessage;
+      break;
+    case 'sticker':
+      mediaMsg = msg.stickerMessage;
+      break;
+    default:
+      return {};
     }
 
     if (!mediaMsg) return {};
@@ -282,7 +282,7 @@ class MediaHandler {
               quotedMsg.imageMessage?.caption ||
               quotedMsg.videoMessage?.caption ||
               null,
-        hasMedia: ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage'].includes(quotedMessageType)
+        hasMedia: ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage'].includes(quotedMessageType),
       };
 
     } catch (err) {

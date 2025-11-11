@@ -3,7 +3,7 @@ Scope: entire repo. Always branch first (feature/... or fix/...), never commit t
 Build/run: `npm ci`; dev: `npm run dev`; prod: `npm start`.
 Health check: `npm run ping` or `curl http://localhost:3000/ping`.
 Tests: none configured; use curl/manual checks. If Jest is added: `npx jest path/to.test.js -t "name"` for single tests.
-Lint/format: no linter configured. Use 2‑space indent, single quotes, semicolons, trailing newline.
+Lint/format: ESLint v9+ is configured (see eslint.config.js). Use 2‑space indent, single quotes, semicolons, trailing newline. Run `npx eslint . --ext .js` before committing.
 Modules: CommonJS only (`require`/`module.exports`). Do not introduce ESM.
 Imports: group built‑in, deps, local; use relative paths (`./`, `../`). Avoid deep coupling.
 Types: plain JS; add JSDoc for complex functions. Do not add TS files unless requested.

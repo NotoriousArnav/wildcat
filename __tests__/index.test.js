@@ -27,25 +27,25 @@ describe('Index Module - restoreAccounts', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
-      debug: jest.fn()
+      debug: jest.fn(),
     };
 
     appLogger.mockReturnValue(mockLogger);
 
     mockAccountManager = {
       listAccounts: jest.fn(),
-      updateAccountStatus: jest.fn()
+      updateAccountStatus: jest.fn(),
     };
 
     mockSocketManager = {
       createSocket: jest.fn(),
       db: {
-        collection: jest.fn()
-      }
+        collection: jest.fn(),
+      },
     };
 
     mockApp = {
-      use: jest.fn()
+      use: jest.fn(),
     };
 
     const mockRouter = { route: jest.fn() };
@@ -88,12 +88,12 @@ describe('Index Module - restoreAccounts', () => {
       
       SocketManager.mockImplementation(() => ({
         init: jest.fn().mockResolvedValue(undefined),
-        db: { collection: jest.fn() }
+        db: { collection: jest.fn() },
       }));
 
       AccountManager.mockImplementation(() => ({
         init: jest.fn().mockResolvedValue(undefined),
-        listAccounts: jest.fn().mockResolvedValue([])
+        listAccounts: jest.fn().mockResolvedValue([]),
       }));
 
       constructApp.mockReturnValue(mockApp);
@@ -123,7 +123,7 @@ describe('Index Module - restoreAccounts', () => {
     it('should log account count with metadata', () => {
       const accounts = [
         { _id: 'acc1', status: 'connected' },
-        { _id: 'acc2', status: 'created' }
+        { _id: 'acc2', status: 'created' },
       ];
       
       mockAccountManager.listAccounts.mockResolvedValue(accounts);

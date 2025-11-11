@@ -19,7 +19,7 @@ const commands = {
           id: acc._id,
           name: acc.name,
           status: acc.currentStatus,
-          hasQR: acc.hasQR
+          hasQR: acc.hasQR,
         }, null, 2));
       });
     } else {
@@ -113,9 +113,9 @@ exit 1
     return `curl -s -X POST ${BASE_URL}/webhooks -H 'Content-Type: application/json' -d '{"url":"${url}"}' | jq '.'`;
   },
   
-  'logs:app': () => `tail -f .logs/app.log | jq '.'`,
-  'logs:http': () => `tail -f .logs/http.log | jq '.'`,
-  'logs:baileys': () => `tail -f .logs/baileys.log | jq '.'`,
+  'logs:app': () => 'tail -f .logs/app.log | jq \'.\'',
+  'logs:http': () => 'tail -f .logs/http.log | jq \'.\'',
+  'logs:baileys': () => 'tail -f .logs/baileys.log | jq \'.\'',
 };
 
 const [,, command, ...args] = process.argv;

@@ -8,20 +8,20 @@ module.exports = {
     '!coverage/**',
     '!node_modules/**',
     '!scripts/**',
-    '!spam.py'
+    '!spam.py',
   ],
   testMatch: [
-    '**/__tests__/**/*.test.js'
+    '**/__tests__/**/*.test.js',
   ],
   coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
       lines: 70,
-      statements: 70
-    }
+      statements: 70,
+    },
   },
   moduleFileExtensions: ['js', 'json'],
   testTimeout: 10000,
-  verbose: true
+  verbose: true,
 };

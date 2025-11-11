@@ -33,7 +33,7 @@ async function restoreAccounts(accountManager, socketManager, app) {
       return;
     }
     
-    log.info(`found_accounts_to_restore`, { count: accounts.length });
+    log.info('found_accounts_to_restore', { count: accounts.length });
     
     for (const account of accounts) {
       const accountId = account._id;
@@ -123,7 +123,7 @@ async function main() {
   log.info('endpoints_summary', {
     accounts_create: 'POST /accounts',
     accounts_list: 'GET /accounts',
-    account_prefix: '/accounts/:accountId/...'
+    account_prefix: '/accounts/:accountId/...',
   });
 
   // Do not log secrets; only note configuration presence
