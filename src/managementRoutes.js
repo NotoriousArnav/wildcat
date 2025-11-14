@@ -91,10 +91,6 @@ function createManagementRoutes(accountManager, socketManager, app) {
     }
   });
 
-  router.get('/ping', (req, res) => {
-    res.status(200).json({ ok: true, pong: true, time: new Date().toISOString() });
-  });
-
   router.post('/webhooks',
     validateRequest(webhookSchema),
     webhookUrlValidationMiddleware({ bodyField: 'webhookUrl' }),

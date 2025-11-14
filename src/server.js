@@ -13,7 +13,12 @@ const constructApp = function () {
   app.use(express.json());
   app.use(httpLogger({ redactBody: false }));
 
-  // Apply authentication middleware (if enabled)
+  // Mount ping route BEFORE auth middleware (health check should be unprotected)
+  app.get('/ping', (req, res) => {
+    res.status(200).json({ ok: true, pong: true, time: new Date().toISOString() });
+  });
+
+  // Apply authentication middleware (if enabled) - AFTER ping route
   app.use(basicAuthMiddleware());
   app.use(apiKeyMiddleware());
 
