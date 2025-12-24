@@ -211,6 +211,47 @@ Authentication: None (development). Add your own auth when exposing publicly.
 - Timestamps are ISO-8601 strings in UTC.
 - WhatsApp JIDs use format `number@s.whatsapp.net` for individuals, `groupid@g.us` for groups.
 
+## Input Validation
+All message endpoints validate input to prevent errors and ensure data integrity:
+
+### WhatsApp JID Format
+Valid formats:
+- **Individual**: `919547400579@s.whatsapp.net` (country code + phone number)
+- **Group**: `120363320392546922@g.us`
+- **Broadcast**: `123456789@broadcast`
+- **Status**: `status@broadcast`
+
+Invalid JID will return:
+```json
+{
+  "ok": false,
+  "error": "Invalid WhatsApp JID format for \"to\" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us"
+}
+```
+
+### Message Length
+- Minimum: 1 character
+- Maximum: 65,536 characters (WhatsApp limit)
+
+Invalid length will return:
+```json
+{
+  "ok": false,
+  "error": "Message length invalid. Must be between 1 and 65536 characters"
+}
+```
+
+### Mentions Array
+When providing mentions, all JIDs in the array must be valid WhatsApp JID format.
+
+Invalid mentions will return:
+```json
+{
+  "ok": false,
+  "error": "Invalid JID format in mentions array"
+}
+```
+
 ---
 
 ## Examples
@@ -243,6 +284,12 @@ curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
     "to": "1234567890@s.whatsapp.net",
     "message": "Hello from Wildcat API!"
   }'
+
+# Note: The API validates WhatsApp JID format
+# Valid formats:
+# - Individual: 919547400579@s.whatsapp.net (country code + number)
+# - Group: 120363320392546922@g.us
+# Invalid format will return: 400 Bad Request with error message
 
 # Send reply to a message
 curl -X POST http://localhost:3000/accounts/mybusiness/message/send \
