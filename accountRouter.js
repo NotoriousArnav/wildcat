@@ -4,6 +4,7 @@ const { connectToDB } = require('./db');
 const MediaHandler = require('./mediaHandler');
 const audioConverter = require('./audioConverter');
 const { appLogger } = require('./logger');
+const { isValidJID, isValidMessageLength, isValidJIDArray } = require('./validators');
 
 // Configure multer for memory storage
 const upload = multer({
@@ -174,6 +175,15 @@ function createAccountRouter(accountId, socketManager) {
     if (!to || !message || !quotedMessageId) {
       return res.status(400).json({ ok: false, error: 'to, message, and quotedMessageId are required' });
     }
+    if (!isValidJID(to)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "to" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
+    if (!isValidMessageLength(message)) {
+      return res.status(400).json({ ok: false, error: 'Message length invalid. Must be between 1 and 65536 characters' });
+    }
+    if (mentions && !isValidJIDArray(mentions)) {
+      return res.status(400).json({ ok: false, error: 'Invalid JID format in mentions array' });
+    }
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo) return res.status(404).json({ ok: false, error: 'Account not found' });
     if (socketInfo.status !== 'connected') {
@@ -197,6 +207,15 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/send', async (req, res) => {
     const { to, message, mentions } = req.body || {};
     if (!to || !message) return res.status(400).json({ ok: false, error: 'to and message are required' });
+    if (!isValidJID(to)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "to" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
+    if (!isValidMessageLength(message)) {
+      return res.status(400).json({ ok: false, error: 'Message length invalid. Must be between 1 and 65536 characters' });
+    }
+    if (mentions && !isValidJIDArray(mentions)) {
+      return res.status(400).json({ ok: false, error: 'Invalid JID format in mentions array' });
+    }
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo) return res.status(404).json({ ok: false, error: 'Account not found' });
     if (socketInfo.status !== 'connected') {
@@ -218,6 +237,9 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/send/image', upload.single('image'), async (req, res) => {
     const { to, caption, quotedMessageId } = req.body || {};
     if (!to) return res.status(400).json({ ok: false, error: 'to field is required' });
+    if (!isValidJID(to)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "to" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
     if (!req.file) return res.status(400).json({ ok: false, error: 'image file is required' });
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo || socketInfo.status !== 'connected') {
@@ -247,6 +269,9 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/send/video', upload.single('video'), async (req, res) => {
     const { to, caption, gifPlayback, quotedMessageId } = req.body || {};
     if (!to) return res.status(400).json({ ok: false, error: 'to field is required' });
+    if (!isValidJID(to)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "to" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
     if (!req.file) return res.status(400).json({ ok: false, error: 'video file is required' });
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo || socketInfo.status !== 'connected') {
@@ -281,6 +306,9 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/send/audio', upload.single('audio'), async (req, res) => {
     const { to, ptt, quotedMessageId } = req.body || {};
     if (!to) return res.status(400).json({ ok: false, error: 'to field is required' });
+    if (!isValidJID(to)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "to" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
     if (!req.file) return res.status(400).json({ ok: false, error: 'audio file is required' });
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo || socketInfo.status !== 'connected') {
@@ -322,6 +350,9 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/send/document', upload.single('document'), async (req, res) => {
     const { to, caption, fileName, quotedMessageId } = req.body || {};
     if (!to) return res.status(400).json({ ok: false, error: 'to field is required' });
+    if (!isValidJID(to)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "to" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
     if (!req.file) return res.status(400).json({ ok: false, error: 'document file is required' });
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo || socketInfo.status !== 'connected') {
@@ -351,6 +382,9 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/react', async (req, res) => {
     const { chatId, messageId, emoji } = req.body || {};
     if (!chatId || !messageId) return res.status(400).json({ ok: false, error: 'chatId and messageId are required' });
+    if (!isValidJID(chatId)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "chatId" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo || socketInfo.status !== 'connected') {
       return res.status(400).json({ ok: false, error: 'Account not connected', status: socketInfo?.status });
@@ -373,6 +407,9 @@ function createAccountRouter(accountId, socketManager) {
   router.post('/message/delete', async (req, res) => {
     const { chatId, messageId } = req.body || {};
     if (!chatId || !messageId) return res.status(400).json({ ok: false, error: 'chatId and messageId are required' });
+    if (!isValidJID(chatId)) {
+      return res.status(400).json({ ok: false, error: 'Invalid WhatsApp JID format for "chatId" field. Expected format: 1234567890@s.whatsapp.net or 123456789@g.us' });
+    }
     const socketInfo = socketManager.getSocket(accountId);
     if (!socketInfo || socketInfo.status !== 'connected') {
       return res.status(400).json({ ok: false, error: 'Account not connected', status: socketInfo?.status });
